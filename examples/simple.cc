@@ -37,15 +37,40 @@ void print_cluster_info(tr1::shared_ptr<Cassandra> client) {
 
 }
 
-void single_insert_get(tr1::shared_ptr<Cassandra> client) {
+void crud_simple(tr1::shared_ptr<Cassandra> client) {
 
   Keyspace *key_space= client->getKeyspace("Keyspace1");
+  string res;
 
   key_space->insertColumn("bob", "Standard1", "age", "20");
-  string res= key_space->getColumnValue("bob", "Standard1", "age");
+  res = key_space->getColumnValue("bob", "Standard1", "age");
   cout << "\tValue in column retrieved is: " << res << endl;
 
+  key_space->insertColumn("bob", "Standard1", "age", "35");
+  res = key_space->getColumnValue("bob", "Standard1", "age");
+  cout << "\tValue in column retrieved is: " << res << endl;
+
+  key_space->removeColumn("bob", "Standard1", "age");
+
 }
+
+void crud_super(tr1::shared_ptr<Cassandra> client) {
+
+  Keyspace *key_space= client->getKeyspace("Keyspace1");
+  string res;
+
+  key_space->insertColumn("bob", "Super1", "attrs", "age", "20");
+  res = key_space->getColumnValue("bob", "Super1", "attrs", "age");
+  cout << "\tValue in column retrieved is: " << res << endl;
+
+  key_space->insertColumn("bob", "Super1", "attrs", "age", "35");
+  res = key_space->getColumnValue("bob", "Super1", "attrs", "age");
+  cout << "\tValue in column retrieved is: " << res << endl;
+
+  key_space->removeSuperColumn("bob", "Super1", "attrs");
+
+}
+
 
 void getcolumns_bykeys(tr1::shared_ptr<Cassandra> client) {
 
@@ -149,8 +174,12 @@ int main() {
   print_cluster_info(client);
   cout << endl;
 
-  cout << "Single insert and get:" << endl;
-  single_insert_get(client);
+  cout << "Single CRUD:" << endl;
+  crud_simple(client);
+  cout << endl;
+
+  cout << "SuperColumn CRUD:" << endl;
+  crud_super(client);
   cout << endl;
 
   cout << "GetColumns by keys:" << endl;
