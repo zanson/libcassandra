@@ -6,9 +6,9 @@
 #ifndef cassandra_TYPES_H
 #define cassandra_TYPES_H
 
-#include <Thrift.h>
-#include <protocol/TProtocol.h>
-#include <transport/TTransport.h>
+#include <thrift/Thrift.h>
+#include <thrift/protocol/TProtocol.h>
+#include <thrift/transport/TTransport.h>
 
 
 
