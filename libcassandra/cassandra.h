@@ -15,7 +15,7 @@
 #include <set>
 #include <map>
 
-#include "libgenthrift/cassandra_types.h"
+#include "../libgenthrift/cassandra_types.h"
 
 namespace org
 {
