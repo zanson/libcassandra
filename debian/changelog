@@ -1,0 +1,5 @@
+libcassandra (0.1-0ubuntu1) lucid; urgency=low
+
+  * Initial release.
+
+ -- Hannes Schmidt <hannes@eyealike.com>  Tue, 06 Jul 2010 14:54:23 -0700
