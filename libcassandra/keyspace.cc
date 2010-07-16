@@ -92,7 +92,7 @@ void Keyspace::remove(const string &key,
   col_path.column_family.assign(column_family);
   if (! super_column_name.empty()) 
   {
-    col_path.column.assign(super_column_name);
+    col_path.super_column.assign(super_column_name);
     col_path.__isset.super_column= true;
   }
   if (! column_name.empty()) 
