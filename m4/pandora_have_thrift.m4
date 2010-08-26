@@ -25,10 +25,10 @@ AC_DEFUN([_PANDORA_SEARCH_THRIFT],[
     ])
     AC_LANG_POP()
   ],[
-    ac_cv_thrift="no"
+    ac_cv_libthrift="no"
   ])
   
-  AM_CONDITIONAL(HAVE_THRIFT, [test "x${ac_cv_thrift}" = "xyes"])
+  AM_CONDITIONAL(HAVE_LIBTHRIFT, [test "x${ac_cv_libthrift}" = "xyes"])
   
 ])
  
@@ -38,7 +38,7 @@ AC_DEFUN([PANDORA_HAVE_THRIFT],[
  
 AC_DEFUN([PANDORA_REQUIRE_THRIFT],[
   AC_REQUIRE([PANDORA_HAVE_THRIFT])
-  AS_IF([test x$ac_cv_thrift= xno],[
+  AS_IF([test "x$ac_cv_libthrift" = "xno"],[
       AC_MSG_ERROR([thrift required for ${PACKAGE}])
   ])
 ])
