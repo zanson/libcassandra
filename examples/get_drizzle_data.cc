@@ -6,9 +6,9 @@
 #include <string>
 #include <stdio.h>
 
-#include <libcassandra/cassandra_factory.h>
-#include <libcassandra/cassandra.h>
-#include <libcassandra/keyspace.h>
+#include "../libcassandra/cassandra_factory.h"
+#include "../libcassandra/cassandra.h"
+#include "../libcassandra/keyspace.h"
 
 using namespace std;
 using namespace libcassandra;

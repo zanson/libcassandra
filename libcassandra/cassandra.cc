@@ -11,7 +11,7 @@
 #include <set>
 #include <sstream>
 
-#include <libgenthrift/Cassandra.h>
+#include "../libgenthrift/Cassandra.h"
 
 #include "cassandra.h"
 #include "keyspace.h"
