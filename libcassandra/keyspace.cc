@@ -12,9 +12,9 @@
 #include <string>
 #include <map>
 
-#include <thrift/protocol/TBinaryProtocol.h>
-#include <thrift/transport/TSocket.h>
-#include <thrift/transport/TTransportUtils.h>
+#include <protocol/TBinaryProtocol.h>
+#include <transport/TSocket.h>
+#include <transport/TTransportUtils.h>
 
 #include "../libgenthrift/Cassandra.h"
 
