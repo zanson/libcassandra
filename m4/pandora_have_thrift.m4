@@ -24,6 +24,13 @@ AC_DEFUN([_PANDORA_SEARCH_THRIFT],[
       apache::thrift::TOutput test_output;
     ])
     AC_LANG_POP()
+
+	 dnl Thrift's generated code as well as its own headers include thrift headers
+	 dnl without a "thrift/" prefix, which means even though the above adds -I PREFIX/include
+	 dnl We also need -I PREFIX/include/thrift
+	 AC_LIB_APPENDTOVAR([INCTHRIFT], [-I]$LIBTHRIFT_PREFIX[/include/thrift])
+	 AC_LIB_APPENDTOVAR([CPPFLAGS], [-I]$LIBTHRIFT_PREFIX[/include/thrift])
+
   ],[
     ac_cv_libthrift="no"
   ])

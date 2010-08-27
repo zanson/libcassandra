@@ -78,6 +78,7 @@ echo "   * C++ cstdint location:      $ac_cv_cxx_cstdint"
 echo "   * C++ hash_map location:     $ac_cv_cxx_hash_map"
 echo "   * C++ hash namespace:        $ac_cv_cxx_hash_namespace"
 echo "   * C++ shared_ptr namespace:  $ac_cv_shared_ptr_namespace"
+echo "   * THRIFT prefix:             $LIBTHRIFT_PREFIX"
 echo ""
 echo "---"
 
