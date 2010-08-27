@@ -32,6 +32,7 @@ class CassandraIf {
   virtual void describe_cluster_name(std::string& _return) = 0;
   virtual void describe_version(std::string& _return) = 0;
   virtual void describe_ring(std::vector<TokenRange> & _return, const std::string& keyspace) = 0;
+  virtual void describe_partitioner(std::string& _return) = 0;
   virtual void describe_keyspace(std::map<std::string, std::map<std::string, std::string> > & _return, const std::string& keyspace) = 0;
   virtual void describe_splits(std::vector<std::string> & _return, const std::string& start_token, const std::string& end_token, const int32_t keys_per_split) = 0;
 };
@@ -94,6 +95,9 @@ class CassandraNull : virtual public CassandraIf {
   void describe_ring(std::vector<TokenRange> & /* _return */, const std::string& /* keyspace */) {
     return;
   }
+  void describe_partitioner(std::string& /* _return */) {
+    return;
+  }
   void describe_keyspace(std::map<std::string, std::map<std::string, std::string> > & /* _return */, const std::string& /* keyspace */) {
     return;
   }
@@ -101,6 +105,7 @@ class CassandraNull : virtual public CassandraIf {
     return;
   }
 };
+
 
 class Cassandra_login_args {
  public:
@@ -132,6 +137,7 @@ class Cassandra_login_args {
 
 };
 
+
 class Cassandra_login_pargs {
  public:
 
@@ -145,6 +151,12 @@ class Cassandra_login_pargs {
 
 };
 
+typedef struct _Cassandra_login_result__isset {
+  _Cassandra_login_result__isset() : authnx(false), authzx(false) {}
+  bool authnx;
+  bool authzx;
+} _Cassandra_login_result__isset;
+
 class Cassandra_login_result {
  public:
 
@@ -156,11 +168,7 @@ class Cassandra_login_result {
   AuthenticationException authnx;
   AuthorizationException authzx;
 
-  struct __isset {
-    __isset() : authnx(false), authzx(false) {}
-    bool authnx;
-    bool authzx;
-  } __isset;
+  _Cassandra_login_result__isset __isset;
 
   bool operator == (const Cassandra_login_result & rhs) const
   {
@@ -181,6 +189,12 @@ class Cassandra_login_result {
 
 };
 
+typedef struct _Cassandra_login_presult__isset {
+  _Cassandra_login_presult__isset() : authnx(false), authzx(false) {}
+  bool authnx;
+  bool authzx;
+} _Cassandra_login_presult__isset;
+
 class Cassandra_login_presult {
  public:
 
@@ -190,15 +204,12 @@ class Cassandra_login_presult {
   AuthenticationException authnx;
   AuthorizationException authzx;
 
-  struct __isset {
-    __isset() : authnx(false), authzx(false) {}
-    bool authnx;
-    bool authzx;
-  } __isset;
+  _Cassandra_login_presult__isset __isset;
 
   uint32_t read(::apache::thrift::protocol::TProtocol* iprot);
 
 };
+
 
 class Cassandra_get_args {
  public:
@@ -238,6 +249,7 @@ class Cassandra_get_args {
 
 };
 
+
 class Cassandra_get_pargs {
  public:
 
@@ -253,6 +265,15 @@ class Cassandra_get_pargs {
 
 };
 
+typedef struct _Cassandra_get_result__isset {
+  _Cassandra_get_result__isset() : success(false), ire(false), nfe(false), ue(false), te(false) {}
+  bool success;
+  bool ire;
+  bool nfe;
+  bool ue;
+  bool te;
+} _Cassandra_get_result__isset;
+
 class Cassandra_get_result {
  public:
 
@@ -267,14 +288,7 @@ class Cassandra_get_result {
   UnavailableException ue;
   TimedOutException te;
 
-  struct __isset {
-    __isset() : success(false), ire(false), nfe(false), ue(false), te(false) {}
-    bool success;
-    bool ire;
-    bool nfe;
-    bool ue;
-    bool te;
-  } __isset;
+  _Cassandra_get_result__isset __isset;
 
   bool operator == (const Cassandra_get_result & rhs) const
   {
@@ -301,6 +315,15 @@ class Cassandra_get_result {
 
 };
 
+typedef struct _Cassandra_get_presult__isset {
+  _Cassandra_get_presult__isset() : success(false), ire(false), nfe(false), ue(false), te(false) {}
+  bool success;
+  bool ire;
+  bool nfe;
+  bool ue;
+  bool te;
+} _Cassandra_get_presult__isset;
+
 class Cassandra_get_presult {
  public:
 
@@ -313,18 +336,12 @@ class Cassandra_get_presult {
   UnavailableException ue;
   TimedOutException te;
 
-  struct __isset {
-    __isset() : success(false), ire(false), nfe(false), ue(false), te(false) {}
-    bool success;
-    bool ire;
-    bool nfe;
-    bool ue;
-    bool te;
-  } __isset;
+  _Cassandra_get_presult__isset __isset;
 
   uint32_t read(::apache::thrift::protocol::TProtocol* iprot);
 
 };
+
 
 class Cassandra_get_slice_args {
  public:
@@ -367,6 +384,7 @@ class Cassandra_get_slice_args {
 
 };
 
+
 class Cassandra_get_slice_pargs {
  public:
 
@@ -383,6 +401,14 @@ class Cassandra_get_slice_pargs {
 
 };
 
+typedef struct _Cassandra_get_slice_result__isset {
+  _Cassandra_get_slice_result__isset() : success(false), ire(false), ue(false), te(false) {}
+  bool success;
+  bool ire;
+  bool ue;
+  bool te;
+} _Cassandra_get_slice_result__isset;
+
 class Cassandra_get_slice_result {
  public:
 
@@ -396,13 +422,7 @@ class Cassandra_get_slice_result {
   UnavailableException ue;
   TimedOutException te;
 
-  struct __isset {
-    __isset() : success(false), ire(false), ue(false), te(false) {}
-    bool success;
-    bool ire;
-    bool ue;
-    bool te;
-  } __isset;
+  _Cassandra_get_slice_result__isset __isset;
 
   bool operator == (const Cassandra_get_slice_result & rhs) const
   {
@@ -427,6 +447,14 @@ class Cassandra_get_slice_result {
 
 };
 
+typedef struct _Cassandra_get_slice_presult__isset {
+  _Cassandra_get_slice_presult__isset() : success(false), ire(false), ue(false), te(false) {}
+  bool success;
+  bool ire;
+  bool ue;
+  bool te;
+} _Cassandra_get_slice_presult__isset;
+
 class Cassandra_get_slice_presult {
  public:
 
@@ -438,17 +466,12 @@ class Cassandra_get_slice_presult {
   UnavailableException ue;
   TimedOutException te;
 
-  struct __isset {
-    __isset() : success(false), ire(false), ue(false), te(false) {}
-    bool success;
-    bool ire;
-    bool ue;
-    bool te;
-  } __isset;
+  _Cassandra_get_slice_presult__isset __isset;
 
   uint32_t read(::apache::thrift::protocol::TProtocol* iprot);
 
 };
+
 
 class Cassandra_multiget_args {
  public:
@@ -488,6 +511,7 @@ class Cassandra_multiget_args {
 
 };
 
+
 class Cassandra_multiget_pargs {
  public:
 
@@ -503,6 +527,14 @@ class Cassandra_multiget_pargs {
 
 };
 
+typedef struct _Cassandra_multiget_result__isset {
+  _Cassandra_multiget_result__isset() : success(false), ire(false), ue(false), te(false) {}
+  bool success;
+  bool ire;
+  bool ue;
+  bool te;
+} _Cassandra_multiget_result__isset;
+
 class Cassandra_multiget_result {
  public:
 
@@ -516,13 +548,7 @@ class Cassandra_multiget_result {
   UnavailableException ue;
   TimedOutException te;
 
-  struct __isset {
-    __isset() : success(false), ire(false), ue(false), te(false) {}
-    bool success;
-    bool ire;
-    bool ue;
-    bool te;
-  } __isset;
+  _Cassandra_multiget_result__isset __isset;
 
   bool operator == (const Cassandra_multiget_result & rhs) const
   {
@@ -547,6 +573,14 @@ class Cassandra_multiget_result {
 
 };
 
+typedef struct _Cassandra_multiget_presult__isset {
+  _Cassandra_multiget_presult__isset() : success(false), ire(false), ue(false), te(false) {}
+  bool success;
+  bool ire;
+  bool ue;
+  bool te;
+} _Cassandra_multiget_presult__isset;
+
 class Cassandra_multiget_presult {
  public:
 
@@ -558,17 +592,12 @@ class Cassandra_multiget_presult {
   UnavailableException ue;
   TimedOutException te;
 
-  struct __isset {
-    __isset() : success(false), ire(false), ue(false), te(false) {}
-    bool success;
-    bool ire;
-    bool ue;
-    bool te;
-  } __isset;
+  _Cassandra_multiget_presult__isset __isset;
 
   uint32_t read(::apache::thrift::protocol::TProtocol* iprot);
 
 };
+
 
 class Cassandra_multiget_slice_args {
  public:
@@ -611,6 +640,7 @@ class Cassandra_multiget_slice_args {
 
 };
 
+
 class Cassandra_multiget_slice_pargs {
  public:
 
@@ -627,6 +657,14 @@ class Cassandra_multiget_slice_pargs {
 
 };
 
+typedef struct _Cassandra_multiget_slice_result__isset {
+  _Cassandra_multiget_slice_result__isset() : success(false), ire(false), ue(false), te(false) {}
+  bool success;
+  bool ire;
+  bool ue;
+  bool te;
+} _Cassandra_multiget_slice_result__isset;
+
 class Cassandra_multiget_slice_result {
  public:
 
@@ -640,13 +678,7 @@ class Cassandra_multiget_slice_result {
   UnavailableException ue;
   TimedOutException te;
 
-  struct __isset {
-    __isset() : success(false), ire(false), ue(false), te(false) {}
-    bool success;
-    bool ire;
-    bool ue;
-    bool te;
-  } __isset;
+  _Cassandra_multiget_slice_result__isset __isset;
 
   bool operator == (const Cassandra_multiget_slice_result & rhs) const
   {
@@ -671,6 +703,14 @@ class Cassandra_multiget_slice_result {
 
 };
 
+typedef struct _Cassandra_multiget_slice_presult__isset {
+  _Cassandra_multiget_slice_presult__isset() : success(false), ire(false), ue(false), te(false) {}
+  bool success;
+  bool ire;
+  bool ue;
+  bool te;
+} _Cassandra_multiget_slice_presult__isset;
+
 class Cassandra_multiget_slice_presult {
  public:
 
@@ -682,17 +722,12 @@ class Cassandra_multiget_slice_presult {
   UnavailableException ue;
   TimedOutException te;
 
-  struct __isset {
-    __isset() : success(false), ire(false), ue(false), te(false) {}
-    bool success;
-    bool ire;
-    bool ue;
-    bool te;
-  } __isset;
+  _Cassandra_multiget_slice_presult__isset __isset;
 
   uint32_t read(::apache::thrift::protocol::TProtocol* iprot);
 
 };
+
 
 class Cassandra_get_count_args {
  public:
@@ -732,6 +767,7 @@ class Cassandra_get_count_args {
 
 };
 
+
 class Cassandra_get_count_pargs {
  public:
 
@@ -747,6 +783,14 @@ class Cassandra_get_count_pargs {
 
 };
 
+typedef struct _Cassandra_get_count_result__isset {
+  _Cassandra_get_count_result__isset() : success(false), ire(false), ue(false), te(false) {}
+  bool success;
+  bool ire;
+  bool ue;
+  bool te;
+} _Cassandra_get_count_result__isset;
+
 class Cassandra_get_count_result {
  public:
 
@@ -760,13 +804,7 @@ class Cassandra_get_count_result {
   UnavailableException ue;
   TimedOutException te;
 
-  struct __isset {
-    __isset() : success(false), ire(false), ue(false), te(false) {}
-    bool success;
-    bool ire;
-    bool ue;
-    bool te;
-  } __isset;
+  _Cassandra_get_count_result__isset __isset;
 
   bool operator == (const Cassandra_get_count_result & rhs) const
   {
@@ -791,6 +829,14 @@ class Cassandra_get_count_result {
 
 };
 
+typedef struct _Cassandra_get_count_presult__isset {
+  _Cassandra_get_count_presult__isset() : success(false), ire(false), ue(false), te(false) {}
+  bool success;
+  bool ire;
+  bool ue;
+  bool te;
+} _Cassandra_get_count_presult__isset;
+
 class Cassandra_get_count_presult {
  public:
 
@@ -802,17 +848,12 @@ class Cassandra_get_count_presult {
   UnavailableException ue;
   TimedOutException te;
 
-  struct __isset {
-    __isset() : success(false), ire(false), ue(false), te(false) {}
-    bool success;
-    bool ire;
-    bool ue;
-    bool te;
-  } __isset;
+  _Cassandra_get_count_presult__isset __isset;
 
   uint32_t read(::apache::thrift::protocol::TProtocol* iprot);
 
 };
+
 
 class Cassandra_get_range_slice_args {
  public:
@@ -861,6 +902,7 @@ class Cassandra_get_range_slice_args {
 
 };
 
+
 class Cassandra_get_range_slice_pargs {
  public:
 
@@ -879,6 +921,14 @@ class Cassandra_get_range_slice_pargs {
 
 };
 
+typedef struct _Cassandra_get_range_slice_result__isset {
+  _Cassandra_get_range_slice_result__isset() : success(false), ire(false), ue(false), te(false) {}
+  bool success;
+  bool ire;
+  bool ue;
+  bool te;
+} _Cassandra_get_range_slice_result__isset;
+
 class Cassandra_get_range_slice_result {
  public:
 
@@ -892,13 +942,7 @@ class Cassandra_get_range_slice_result {
   UnavailableException ue;
   TimedOutException te;
 
-  struct __isset {
-    __isset() : success(false), ire(false), ue(false), te(false) {}
-    bool success;
-    bool ire;
-    bool ue;
-    bool te;
-  } __isset;
+  _Cassandra_get_range_slice_result__isset __isset;
 
   bool operator == (const Cassandra_get_range_slice_result & rhs) const
   {
@@ -923,6 +967,14 @@ class Cassandra_get_range_slice_result {
 
 };
 
+typedef struct _Cassandra_get_range_slice_presult__isset {
+  _Cassandra_get_range_slice_presult__isset() : success(false), ire(false), ue(false), te(false) {}
+  bool success;
+  bool ire;
+  bool ue;
+  bool te;
+} _Cassandra_get_range_slice_presult__isset;
+
 class Cassandra_get_range_slice_presult {
  public:
 
@@ -934,17 +986,12 @@ class Cassandra_get_range_slice_presult {
   UnavailableException ue;
   TimedOutException te;
 
-  struct __isset {
-    __isset() : success(false), ire(false), ue(false), te(false) {}
-    bool success;
-    bool ire;
-    bool ue;
-    bool te;
-  } __isset;
+  _Cassandra_get_range_slice_presult__isset __isset;
 
   uint32_t read(::apache::thrift::protocol::TProtocol* iprot);
 
 };
+
 
 class Cassandra_get_range_slices_args {
  public:
@@ -987,6 +1034,7 @@ class Cassandra_get_range_slices_args {
 
 };
 
+
 class Cassandra_get_range_slices_pargs {
  public:
 
@@ -1003,6 +1051,14 @@ class Cassandra_get_range_slices_pargs {
 
 };
 
+typedef struct _Cassandra_get_range_slices_result__isset {
+  _Cassandra_get_range_slices_result__isset() : success(false), ire(false), ue(false), te(false) {}
+  bool success;
+  bool ire;
+  bool ue;
+  bool te;
+} _Cassandra_get_range_slices_result__isset;
+
 class Cassandra_get_range_slices_result {
  public:
 
@@ -1016,13 +1072,7 @@ class Cassandra_get_range_slices_result {
   UnavailableException ue;
   TimedOutException te;
 
-  struct __isset {
-    __isset() : success(false), ire(false), ue(false), te(false) {}
-    bool success;
-    bool ire;
-    bool ue;
-    bool te;
-  } __isset;
+  _Cassandra_get_range_slices_result__isset __isset;
 
   bool operator == (const Cassandra_get_range_slices_result & rhs) const
   {
@@ -1047,6 +1097,14 @@ class Cassandra_get_range_slices_result {
 
 };
 
+typedef struct _Cassandra_get_range_slices_presult__isset {
+  _Cassandra_get_range_slices_presult__isset() : success(false), ire(false), ue(false), te(false) {}
+  bool success;
+  bool ire;
+  bool ue;
+  bool te;
+} _Cassandra_get_range_slices_presult__isset;
+
 class Cassandra_get_range_slices_presult {
  public:
 
@@ -1058,23 +1116,18 @@ class Cassandra_get_range_slices_presult {
   UnavailableException ue;
   TimedOutException te;
 
-  struct __isset {
-    __isset() : success(false), ire(false), ue(false), te(false) {}
-    bool success;
-    bool ire;
-    bool ue;
-    bool te;
-  } __isset;
+  _Cassandra_get_range_slices_presult__isset __isset;
 
   uint32_t read(::apache::thrift::protocol::TProtocol* iprot);
 
 };
 
+
 class Cassandra_insert_args {
  public:
 
   Cassandra_insert_args() : keyspace(""), key(""), value(""), timestamp(0) {
-    consistency_level = (ConsistencyLevel)0;
+    consistency_level = (ConsistencyLevel)1;
 
   }
 
@@ -1114,6 +1167,7 @@ class Cassandra_insert_args {
 
 };
 
+
 class Cassandra_insert_pargs {
  public:
 
@@ -1131,6 +1185,13 @@ class Cassandra_insert_pargs {
 
 };
 
+typedef struct _Cassandra_insert_result__isset {
+  _Cassandra_insert_result__isset() : ire(false), ue(false), te(false) {}
+  bool ire;
+  bool ue;
+  bool te;
+} _Cassandra_insert_result__isset;
+
 class Cassandra_insert_result {
  public:
 
@@ -1143,12 +1204,7 @@ class Cassandra_insert_result {
   UnavailableException ue;
   TimedOutException te;
 
-  struct __isset {
-    __isset() : ire(false), ue(false), te(false) {}
-    bool ire;
-    bool ue;
-    bool te;
-  } __isset;
+  _Cassandra_insert_result__isset __isset;
 
   bool operator == (const Cassandra_insert_result & rhs) const
   {
@@ -1171,6 +1227,13 @@ class Cassandra_insert_result {
 
 };
 
+typedef struct _Cassandra_insert_presult__isset {
+  _Cassandra_insert_presult__isset() : ire(false), ue(false), te(false) {}
+  bool ire;
+  bool ue;
+  bool te;
+} _Cassandra_insert_presult__isset;
+
 class Cassandra_insert_presult {
  public:
 
@@ -1181,22 +1244,18 @@ class Cassandra_insert_presult {
   UnavailableException ue;
   TimedOutException te;
 
-  struct __isset {
-    __isset() : ire(false), ue(false), te(false) {}
-    bool ire;
-    bool ue;
-    bool te;
-  } __isset;
+  _Cassandra_insert_presult__isset __isset;
 
   uint32_t read(::apache::thrift::protocol::TProtocol* iprot);
 
 };
 
+
 class Cassandra_batch_insert_args {
  public:
 
   Cassandra_batch_insert_args() : keyspace(""), key("") {
-    consistency_level = (ConsistencyLevel)0;
+    consistency_level = (ConsistencyLevel)1;
 
   }
 
@@ -1230,6 +1289,7 @@ class Cassandra_batch_insert_args {
 
 };
 
+
 class Cassandra_batch_insert_pargs {
  public:
 
@@ -1245,6 +1305,13 @@ class Cassandra_batch_insert_pargs {
 
 };
 
+typedef struct _Cassandra_batch_insert_result__isset {
+  _Cassandra_batch_insert_result__isset() : ire(false), ue(false), te(false) {}
+  bool ire;
+  bool ue;
+  bool te;
+} _Cassandra_batch_insert_result__isset;
+
 class Cassandra_batch_insert_result {
  public:
 
@@ -1257,12 +1324,7 @@ class Cassandra_batch_insert_result {
   UnavailableException ue;
   TimedOutException te;
 
-  struct __isset {
-    __isset() : ire(false), ue(false), te(false) {}
-    bool ire;
-    bool ue;
-    bool te;
-  } __isset;
+  _Cassandra_batch_insert_result__isset __isset;
 
   bool operator == (const Cassandra_batch_insert_result & rhs) const
   {
@@ -1285,6 +1347,13 @@ class Cassandra_batch_insert_result {
 
 };
 
+typedef struct _Cassandra_batch_insert_presult__isset {
+  _Cassandra_batch_insert_presult__isset() : ire(false), ue(false), te(false) {}
+  bool ire;
+  bool ue;
+  bool te;
+} _Cassandra_batch_insert_presult__isset;
+
 class Cassandra_batch_insert_presult {
  public:
 
@@ -1295,22 +1364,22 @@ class Cassandra_batch_insert_presult {
   UnavailableException ue;
   TimedOutException te;
 
-  struct __isset {
-    __isset() : ire(false), ue(false), te(false) {}
-    bool ire;
-    bool ue;
-    bool te;
-  } __isset;
+  _Cassandra_batch_insert_presult__isset __isset;
 
   uint32_t read(::apache::thrift::protocol::TProtocol* iprot);
 
 };
 
+typedef struct _Cassandra_remove_args__isset {
+  _Cassandra_remove_args__isset() : consistency_level(false) {}
+  bool consistency_level;
+} _Cassandra_remove_args__isset;
+
 class Cassandra_remove_args {
  public:
 
   Cassandra_remove_args() : keyspace(""), key(""), timestamp(0) {
-    consistency_level = (ConsistencyLevel)0;
+    consistency_level = (ConsistencyLevel)1;
 
   }
 
@@ -1322,10 +1391,7 @@ class Cassandra_remove_args {
   int64_t timestamp;
   ConsistencyLevel consistency_level;
 
-  struct __isset {
-    __isset() : consistency_level(false) {}
-    bool consistency_level;
-  } __isset;
+  _Cassandra_remove_args__isset __isset;
 
   bool operator == (const Cassandra_remove_args & rhs) const
   {
@@ -1352,6 +1418,7 @@ class Cassandra_remove_args {
 
 };
 
+
 class Cassandra_remove_pargs {
  public:
 
@@ -1368,6 +1435,13 @@ class Cassandra_remove_pargs {
 
 };
 
+typedef struct _Cassandra_remove_result__isset {
+  _Cassandra_remove_result__isset() : ire(false), ue(false), te(false) {}
+  bool ire;
+  bool ue;
+  bool te;
+} _Cassandra_remove_result__isset;
+
 class Cassandra_remove_result {
  public:
 
@@ -1380,12 +1454,7 @@ class Cassandra_remove_result {
   UnavailableException ue;
   TimedOutException te;
 
-  struct __isset {
-    __isset() : ire(false), ue(false), te(false) {}
-    bool ire;
-    bool ue;
-    bool te;
-  } __isset;
+  _Cassandra_remove_result__isset __isset;
 
   bool operator == (const Cassandra_remove_result & rhs) const
   {
@@ -1408,6 +1477,13 @@ class Cassandra_remove_result {
 
 };
 
+typedef struct _Cassandra_remove_presult__isset {
+  _Cassandra_remove_presult__isset() : ire(false), ue(false), te(false) {}
+  bool ire;
+  bool ue;
+  bool te;
+} _Cassandra_remove_presult__isset;
+
 class Cassandra_remove_presult {
  public:
 
@@ -1418,22 +1494,18 @@ class Cassandra_remove_presult {
   UnavailableException ue;
   TimedOutException te;
 
-  struct __isset {
-    __isset() : ire(false), ue(false), te(false) {}
-    bool ire;
-    bool ue;
-    bool te;
-  } __isset;
+  _Cassandra_remove_presult__isset __isset;
 
   uint32_t read(::apache::thrift::protocol::TProtocol* iprot);
 
 };
 
+
 class Cassandra_batch_mutate_args {
  public:
 
   Cassandra_batch_mutate_args() : keyspace("") {
-    consistency_level = (ConsistencyLevel)0;
+    consistency_level = (ConsistencyLevel)1;
 
   }
 
@@ -1464,6 +1536,7 @@ class Cassandra_batch_mutate_args {
 
 };
 
+
 class Cassandra_batch_mutate_pargs {
  public:
 
@@ -1478,6 +1551,13 @@ class Cassandra_batch_mutate_pargs {
 
 };
 
+typedef struct _Cassandra_batch_mutate_result__isset {
+  _Cassandra_batch_mutate_result__isset() : ire(false), ue(false), te(false) {}
+  bool ire;
+  bool ue;
+  bool te;
+} _Cassandra_batch_mutate_result__isset;
+
 class Cassandra_batch_mutate_result {
  public:
 
@@ -1490,12 +1570,7 @@ class Cassandra_batch_mutate_result {
   UnavailableException ue;
   TimedOutException te;
 
-  struct __isset {
-    __isset() : ire(false), ue(false), te(false) {}
-    bool ire;
-    bool ue;
-    bool te;
-  } __isset;
+  _Cassandra_batch_mutate_result__isset __isset;
 
   bool operator == (const Cassandra_batch_mutate_result & rhs) const
   {
@@ -1518,6 +1593,13 @@ class Cassandra_batch_mutate_result {
 
 };
 
+typedef struct _Cassandra_batch_mutate_presult__isset {
+  _Cassandra_batch_mutate_presult__isset() : ire(false), ue(false), te(false) {}
+  bool ire;
+  bool ue;
+  bool te;
+} _Cassandra_batch_mutate_presult__isset;
+
 class Cassandra_batch_mutate_presult {
  public:
 
@@ -1528,16 +1610,12 @@ class Cassandra_batch_mutate_presult {
   UnavailableException ue;
   TimedOutException te;
 
-  struct __isset {
-    __isset() : ire(false), ue(false), te(false) {}
-    bool ire;
-    bool ue;
-    bool te;
-  } __isset;
+  _Cassandra_batch_mutate_presult__isset __isset;
 
   uint32_t read(::apache::thrift::protocol::TProtocol* iprot);
 
 };
+
 
 class Cassandra_get_string_property_args {
  public:
@@ -1566,6 +1644,7 @@ class Cassandra_get_string_property_args {
 
 };
 
+
 class Cassandra_get_string_property_pargs {
  public:
 
@@ -1578,6 +1657,11 @@ class Cassandra_get_string_property_pargs {
 
 };
 
+typedef struct _Cassandra_get_string_property_result__isset {
+  _Cassandra_get_string_property_result__isset() : success(false) {}
+  bool success;
+} _Cassandra_get_string_property_result__isset;
+
 class Cassandra_get_string_property_result {
  public:
 
@@ -1588,10 +1672,7 @@ class Cassandra_get_string_property_result {
 
   std::string success;
 
-  struct __isset {
-    __isset() : success(false) {}
-    bool success;
-  } __isset;
+  _Cassandra_get_string_property_result__isset __isset;
 
   bool operator == (const Cassandra_get_string_property_result & rhs) const
   {
@@ -1610,6 +1691,11 @@ class Cassandra_get_string_property_result {
 
 };
 
+typedef struct _Cassandra_get_string_property_presult__isset {
+  _Cassandra_get_string_property_presult__isset() : success(false) {}
+  bool success;
+} _Cassandra_get_string_property_presult__isset;
+
 class Cassandra_get_string_property_presult {
  public:
 
@@ -1618,14 +1704,12 @@ class Cassandra_get_string_property_presult {
 
   std::string* success;
 
-  struct __isset {
-    __isset() : success(false) {}
-    bool success;
-  } __isset;
+  _Cassandra_get_string_property_presult__isset __isset;
 
   uint32_t read(::apache::thrift::protocol::TProtocol* iprot);
 
 };
+
 
 class Cassandra_get_string_list_property_args {
  public:
@@ -1654,6 +1738,7 @@ class Cassandra_get_string_list_property_args {
 
 };
 
+
 class Cassandra_get_string_list_property_pargs {
  public:
 
@@ -1666,6 +1751,11 @@ class Cassandra_get_string_list_property_pargs {
 
 };
 
+typedef struct _Cassandra_get_string_list_property_result__isset {
+  _Cassandra_get_string_list_property_result__isset() : success(false) {}
+  bool success;
+} _Cassandra_get_string_list_property_result__isset;
+
 class Cassandra_get_string_list_property_result {
  public:
 
@@ -1676,10 +1766,7 @@ class Cassandra_get_string_list_property_result {
 
   std::vector<std::string>  success;
 
-  struct __isset {
-    __isset() : success(false) {}
-    bool success;
-  } __isset;
+  _Cassandra_get_string_list_property_result__isset __isset;
 
   bool operator == (const Cassandra_get_string_list_property_result & rhs) const
   {
@@ -1698,6 +1785,11 @@ class Cassandra_get_string_list_property_result {
 
 };
 
+typedef struct _Cassandra_get_string_list_property_presult__isset {
+  _Cassandra_get_string_list_property_presult__isset() : success(false) {}
+  bool success;
+} _Cassandra_get_string_list_property_presult__isset;
+
 class Cassandra_get_string_list_property_presult {
  public:
 
@@ -1706,14 +1798,12 @@ class Cassandra_get_string_list_property_presult {
 
   std::vector<std::string> * success;
 
-  struct __isset {
-    __isset() : success(false) {}
-    bool success;
-  } __isset;
+  _Cassandra_get_string_list_property_presult__isset __isset;
 
   uint32_t read(::apache::thrift::protocol::TProtocol* iprot);
 
 };
+
 
 class Cassandra_describe_keyspaces_args {
  public:
@@ -1739,6 +1829,7 @@ class Cassandra_describe_keyspaces_args {
 
 };
 
+
 class Cassandra_describe_keyspaces_pargs {
  public:
 
@@ -1750,6 +1841,11 @@ class Cassandra_describe_keyspaces_pargs {
 
 };
 
+typedef struct _Cassandra_describe_keyspaces_result__isset {
+  _Cassandra_describe_keyspaces_result__isset() : success(false) {}
+  bool success;
+} _Cassandra_describe_keyspaces_result__isset;
+
 class Cassandra_describe_keyspaces_result {
  public:
 
@@ -1760,10 +1856,7 @@ class Cassandra_describe_keyspaces_result {
 
   std::set<std::string>  success;
 
-  struct __isset {
-    __isset() : success(false) {}
-    bool success;
-  } __isset;
+  _Cassandra_describe_keyspaces_result__isset __isset;
 
   bool operator == (const Cassandra_describe_keyspaces_result & rhs) const
   {
@@ -1782,6 +1875,11 @@ class Cassandra_describe_keyspaces_result {
 
 };
 
+typedef struct _Cassandra_describe_keyspaces_presult__isset {
+  _Cassandra_describe_keyspaces_presult__isset() : success(false) {}
+  bool success;
+} _Cassandra_describe_keyspaces_presult__isset;
+
 class Cassandra_describe_keyspaces_presult {
  public:
 
@@ -1790,14 +1888,12 @@ class Cassandra_describe_keyspaces_presult {
 
   std::set<std::string> * success;
 
-  struct __isset {
-    __isset() : success(false) {}
-    bool success;
-  } __isset;
+  _Cassandra_describe_keyspaces_presult__isset __isset;
 
   uint32_t read(::apache::thrift::protocol::TProtocol* iprot);
 
 };
+
 
 class Cassandra_describe_cluster_name_args {
  public:
@@ -1823,6 +1919,7 @@ class Cassandra_describe_cluster_name_args {
 
 };
 
+
 class Cassandra_describe_cluster_name_pargs {
  public:
 
@@ -1834,6 +1931,11 @@ class Cassandra_describe_cluster_name_pargs {
 
 };
 
+typedef struct _Cassandra_describe_cluster_name_result__isset {
+  _Cassandra_describe_cluster_name_result__isset() : success(false) {}
+  bool success;
+} _Cassandra_describe_cluster_name_result__isset;
+
 class Cassandra_describe_cluster_name_result {
  public:
 
@@ -1844,10 +1946,7 @@ class Cassandra_describe_cluster_name_result {
 
   std::string success;
 
-  struct __isset {
-    __isset() : success(false) {}
-    bool success;
-  } __isset;
+  _Cassandra_describe_cluster_name_result__isset __isset;
 
   bool operator == (const Cassandra_describe_cluster_name_result & rhs) const
   {
@@ -1866,6 +1965,11 @@ class Cassandra_describe_cluster_name_result {
 
 };
 
+typedef struct _Cassandra_describe_cluster_name_presult__isset {
+  _Cassandra_describe_cluster_name_presult__isset() : success(false) {}
+  bool success;
+} _Cassandra_describe_cluster_name_presult__isset;
+
 class Cassandra_describe_cluster_name_presult {
  public:
 
@@ -1874,14 +1978,12 @@ class Cassandra_describe_cluster_name_presult {
 
   std::string* success;
 
-  struct __isset {
-    __isset() : success(false) {}
-    bool success;
-  } __isset;
+  _Cassandra_describe_cluster_name_presult__isset __isset;
 
   uint32_t read(::apache::thrift::protocol::TProtocol* iprot);
 
 };
+
 
 class Cassandra_describe_version_args {
  public:
@@ -1907,6 +2009,7 @@ class Cassandra_describe_version_args {
 
 };
 
+
 class Cassandra_describe_version_pargs {
  public:
 
@@ -1918,6 +2021,11 @@ class Cassandra_describe_version_pargs {
 
 };
 
+typedef struct _Cassandra_describe_version_result__isset {
+  _Cassandra_describe_version_result__isset() : success(false) {}
+  bool success;
+} _Cassandra_describe_version_result__isset;
+
 class Cassandra_describe_version_result {
  public:
 
@@ -1928,10 +2036,7 @@ class Cassandra_describe_version_result {
 
   std::string success;
 
-  struct __isset {
-    __isset() : success(false) {}
-    bool success;
-  } __isset;
+  _Cassandra_describe_version_result__isset __isset;
 
   bool operator == (const Cassandra_describe_version_result & rhs) const
   {
@@ -1950,6 +2055,11 @@ class Cassandra_describe_version_result {
 
 };
 
+typedef struct _Cassandra_describe_version_presult__isset {
+  _Cassandra_describe_version_presult__isset() : success(false) {}
+  bool success;
+} _Cassandra_describe_version_presult__isset;
+
 class Cassandra_describe_version_presult {
  public:
 
@@ -1958,14 +2068,12 @@ class Cassandra_describe_version_presult {
 
   std::string* success;
 
-  struct __isset {
-    __isset() : success(false) {}
-    bool success;
-  } __isset;
+  _Cassandra_describe_version_presult__isset __isset;
 
   uint32_t read(::apache::thrift::protocol::TProtocol* iprot);
 
 };
+
 
 class Cassandra_describe_ring_args {
  public:
@@ -1994,6 +2102,7 @@ class Cassandra_describe_ring_args {
 
 };
 
+
 class Cassandra_describe_ring_pargs {
  public:
 
@@ -2006,6 +2115,12 @@ class Cassandra_describe_ring_pargs {
 
 };
 
+typedef struct _Cassandra_describe_ring_result__isset {
+  _Cassandra_describe_ring_result__isset() : success(false), ire(false) {}
+  bool success;
+  bool ire;
+} _Cassandra_describe_ring_result__isset;
+
 class Cassandra_describe_ring_result {
  public:
 
@@ -2015,15 +2130,15 @@ class Cassandra_describe_ring_result {
   virtual ~Cassandra_describe_ring_result() throw() {}
 
   std::vector<TokenRange>  success;
+  InvalidRequestException ire;
 
-  struct __isset {
-    __isset() : success(false) {}
-    bool success;
-  } __isset;
+  _Cassandra_describe_ring_result__isset __isset;
 
   bool operator == (const Cassandra_describe_ring_result & rhs) const
   {
     if (!(success == rhs.success))
+      return false;
+    if (!(ire == rhs.ire))
       return false;
     return true;
   }
@@ -2038,6 +2153,12 @@ class Cassandra_describe_ring_result {
 
 };
 
+typedef struct _Cassandra_describe_ring_presult__isset {
+  _Cassandra_describe_ring_presult__isset() : success(false), ire(false) {}
+  bool success;
+  bool ire;
+} _Cassandra_describe_ring_presult__isset;
+
 class Cassandra_describe_ring_presult {
  public:
 
@@ -2045,15 +2166,104 @@ class Cassandra_describe_ring_presult {
   virtual ~Cassandra_describe_ring_presult() throw() {}
 
   std::vector<TokenRange> * success;
+  InvalidRequestException ire;
 
-  struct __isset {
-    __isset() : success(false) {}
-    bool success;
-  } __isset;
+  _Cassandra_describe_ring_presult__isset __isset;
 
   uint32_t read(::apache::thrift::protocol::TProtocol* iprot);
 
 };
+
+
+class Cassandra_describe_partitioner_args {
+ public:
+
+  Cassandra_describe_partitioner_args() {
+  }
+
+  virtual ~Cassandra_describe_partitioner_args() throw() {}
+
+
+  bool operator == (const Cassandra_describe_partitioner_args & /* rhs */) const
+  {
+    return true;
+  }
+  bool operator != (const Cassandra_describe_partitioner_args &rhs) const {
+    return !(*this == rhs);
+  }
+
+  bool operator < (const Cassandra_describe_partitioner_args & ) const;
+
+  uint32_t read(::apache::thrift::protocol::TProtocol* iprot);
+  uint32_t write(::apache::thrift::protocol::TProtocol* oprot) const;
+
+};
+
+
+class Cassandra_describe_partitioner_pargs {
+ public:
+
+
+  virtual ~Cassandra_describe_partitioner_pargs() throw() {}
+
+
+  uint32_t write(::apache::thrift::protocol::TProtocol* oprot) const;
+
+};
+
+typedef struct _Cassandra_describe_partitioner_result__isset {
+  _Cassandra_describe_partitioner_result__isset() : success(false) {}
+  bool success;
+} _Cassandra_describe_partitioner_result__isset;
+
+class Cassandra_describe_partitioner_result {
+ public:
+
+  Cassandra_describe_partitioner_result() : success("") {
+  }
+
+  virtual ~Cassandra_describe_partitioner_result() throw() {}
+
+  std::string success;
+
+  _Cassandra_describe_partitioner_result__isset __isset;
+
+  bool operator == (const Cassandra_describe_partitioner_result & rhs) const
+  {
+    if (!(success == rhs.success))
+      return false;
+    return true;
+  }
+  bool operator != (const Cassandra_describe_partitioner_result &rhs) const {
+    return !(*this == rhs);
+  }
+
+  bool operator < (const Cassandra_describe_partitioner_result & ) const;
+
+  uint32_t read(::apache::thrift::protocol::TProtocol* iprot);
+  uint32_t write(::apache::thrift::protocol::TProtocol* oprot) const;
+
+};
+
+typedef struct _Cassandra_describe_partitioner_presult__isset {
+  _Cassandra_describe_partitioner_presult__isset() : success(false) {}
+  bool success;
+} _Cassandra_describe_partitioner_presult__isset;
+
+class Cassandra_describe_partitioner_presult {
+ public:
+
+
+  virtual ~Cassandra_describe_partitioner_presult() throw() {}
+
+  std::string* success;
+
+  _Cassandra_describe_partitioner_presult__isset __isset;
+
+  uint32_t read(::apache::thrift::protocol::TProtocol* iprot);
+
+};
+
 
 class Cassandra_describe_keyspace_args {
  public:
@@ -2082,6 +2292,7 @@ class Cassandra_describe_keyspace_args {
 
 };
 
+
 class Cassandra_describe_keyspace_pargs {
  public:
 
@@ -2094,6 +2305,12 @@ class Cassandra_describe_keyspace_pargs {
 
 };
 
+typedef struct _Cassandra_describe_keyspace_result__isset {
+  _Cassandra_describe_keyspace_result__isset() : success(false), nfe(false) {}
+  bool success;
+  bool nfe;
+} _Cassandra_describe_keyspace_result__isset;
+
 class Cassandra_describe_keyspace_result {
  public:
 
@@ -2105,11 +2322,7 @@ class Cassandra_describe_keyspace_result {
   std::map<std::string, std::map<std::string, std::string> >  success;
   NotFoundException nfe;
 
-  struct __isset {
-    __isset() : success(false), nfe(false) {}
-    bool success;
-    bool nfe;
-  } __isset;
+  _Cassandra_describe_keyspace_result__isset __isset;
 
   bool operator == (const Cassandra_describe_keyspace_result & rhs) const
   {
@@ -2130,6 +2343,12 @@ class Cassandra_describe_keyspace_result {
 
 };
 
+typedef struct _Cassandra_describe_keyspace_presult__isset {
+  _Cassandra_describe_keyspace_presult__isset() : success(false), nfe(false) {}
+  bool success;
+  bool nfe;
+} _Cassandra_describe_keyspace_presult__isset;
+
 class Cassandra_describe_keyspace_presult {
  public:
 
@@ -2139,15 +2358,12 @@ class Cassandra_describe_keyspace_presult {
   std::map<std::string, std::map<std::string, std::string> > * success;
   NotFoundException nfe;
 
-  struct __isset {
-    __isset() : success(false), nfe(false) {}
-    bool success;
-    bool nfe;
-  } __isset;
+  _Cassandra_describe_keyspace_presult__isset __isset;
 
   uint32_t read(::apache::thrift::protocol::TProtocol* iprot);
 
 };
+
 
 class Cassandra_describe_splits_args {
  public:
@@ -2182,6 +2398,7 @@ class Cassandra_describe_splits_args {
 
 };
 
+
 class Cassandra_describe_splits_pargs {
  public:
 
@@ -2196,6 +2413,11 @@ class Cassandra_describe_splits_pargs {
 
 };
 
+typedef struct _Cassandra_describe_splits_result__isset {
+  _Cassandra_describe_splits_result__isset() : success(false) {}
+  bool success;
+} _Cassandra_describe_splits_result__isset;
+
 class Cassandra_describe_splits_result {
  public:
 
@@ -2206,10 +2428,7 @@ class Cassandra_describe_splits_result {
 
   std::vector<std::string>  success;
 
-  struct __isset {
-    __isset() : success(false) {}
-    bool success;
-  } __isset;
+  _Cassandra_describe_splits_result__isset __isset;
 
   bool operator == (const Cassandra_describe_splits_result & rhs) const
   {
@@ -2228,6 +2447,11 @@ class Cassandra_describe_splits_result {
 
 };
 
+typedef struct _Cassandra_describe_splits_presult__isset {
+  _Cassandra_describe_splits_presult__isset() : success(false) {}
+  bool success;
+} _Cassandra_describe_splits_presult__isset;
+
 class Cassandra_describe_splits_presult {
  public:
 
@@ -2236,10 +2460,7 @@ class Cassandra_describe_splits_presult {
 
   std::vector<std::string> * success;
 
-  struct __isset {
-    __isset() : success(false) {}
-    bool success;
-  } __isset;
+  _Cassandra_describe_splits_presult__isset __isset;
 
   uint32_t read(::apache::thrift::protocol::TProtocol* iprot);
 
@@ -2319,6 +2540,9 @@ class CassandraClient : virtual public CassandraIf {
   void describe_ring(std::vector<TokenRange> & _return, const std::string& keyspace);
   void send_describe_ring(const std::string& keyspace);
   void recv_describe_ring(std::vector<TokenRange> & _return);
+  void describe_partitioner(std::string& _return);
+  void send_describe_partitioner();
+  void recv_describe_partitioner(std::string& _return);
   void describe_keyspace(std::map<std::string, std::map<std::string, std::string> > & _return, const std::string& keyspace);
   void send_describe_keyspace(const std::string& keyspace);
   void recv_describe_keyspace(std::map<std::string, std::map<std::string, std::string> > & _return);
@@ -2356,6 +2580,7 @@ class CassandraProcessor : virtual public ::apache::thrift::TProcessor {
   void process_describe_cluster_name(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot);
   void process_describe_version(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot);
   void process_describe_ring(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot);
+  void process_describe_partitioner(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot);
   void process_describe_keyspace(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot);
   void process_describe_splits(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot);
  public:
@@ -2379,6 +2604,7 @@ class CassandraProcessor : virtual public ::apache::thrift::TProcessor {
     processMap_["describe_cluster_name"] = &CassandraProcessor::process_describe_cluster_name;
     processMap_["describe_version"] = &CassandraProcessor::process_describe_version;
     processMap_["describe_ring"] = &CassandraProcessor::process_describe_ring;
+    processMap_["describe_partitioner"] = &CassandraProcessor::process_describe_partitioner;
     processMap_["describe_keyspace"] = &CassandraProcessor::process_describe_keyspace;
     processMap_["describe_splits"] = &CassandraProcessor::process_describe_splits;
   }
@@ -2585,6 +2811,18 @@ class CassandraMultiface : virtual public CassandraIf {
         return;
       } else {
         ifaces_[i]->describe_ring(_return, keyspace);
+      }
+    }
+  }
+
+  void describe_partitioner(std::string& _return) {
+    uint32_t sz = ifaces_.size();
+    for (uint32_t i = 0; i < sz; ++i) {
+      if (i == sz - 1) {
+        ifaces_[i]->describe_partitioner(_return);
+        return;
+      } else {
+        ifaces_[i]->describe_partitioner(_return);
       }
     }
   }
