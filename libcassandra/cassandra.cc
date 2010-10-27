@@ -16,6 +16,8 @@
 #include <iostream>
 
 #include "libgenthrift/Cassandra.h"
+#include <transport/TSocket.h>
+#include <transport/TBufferTransports.h>
 
 #include "libcassandra/cassandra.h"
 #include "libcassandra/exception.h"
@@ -79,6 +81,29 @@ Cassandra::~Cassandra()
   delete thrift_client;
 }
 
+void Cassandra::setRecvTimeout(int recv_timeout) {
+
+  if (recv_timeout > 0) {
+    boost::shared_ptr<apache::thrift::transport::TTransport>            t1 = thrift_client->getInputProtocol()->getTransport();
+    boost::shared_ptr<apache::thrift::transport::TFramedTransport>      t2 = boost::dynamic_pointer_cast<apache::thrift::transport::TFramedTransport>(t1);
+    boost::shared_ptr<apache::thrift::transport::TTransport>            t3 = t2->getUnderlyingTransport();
+    boost::shared_ptr<apache::thrift::transport::TSocket>                s = boost::dynamic_pointer_cast<apache::thrift::transport::TSocket>(t3);
+    s->setRecvTimeout(recv_timeout);
+  }
+
+}
+
+void Cassandra::setSendTimeout(int send_timeout) {
+
+  if (send_timeout > 0) {
+    boost::shared_ptr<apache::thrift::transport::TTransport>            t1 = thrift_client->getOutputProtocol()->getTransport();
+    boost::shared_ptr<apache::thrift::transport::TFramedTransport>      t2 = boost::dynamic_pointer_cast<apache::thrift::transport::TFramedTransport>(t1);
+    boost::shared_ptr<apache::thrift::transport::TTransport>            t3 = t2->getUnderlyingTransport();
+    boost::shared_ptr<apache::thrift::transport::TSocket>                s = boost::dynamic_pointer_cast<apache::thrift::transport::TSocket>(t3);
+    s->setSendTimeout(send_timeout);
+  }
+
+}
 
 CassandraClient *Cassandra::getCassandra()
 {

@@ -33,7 +33,10 @@ CassandraFactory::CassandraFactory(const string& server_list)
   :
     url(server_list),
     host(),
-    port(0)
+    port(0),
+    conn_timeout(-1),
+    recv_timeout(-1),
+    send_timeout(-1)
 {
   /* get the host name from the server list string */
   string::size_type pos= server_list.find_first_of(':');
@@ -45,12 +48,14 @@ CassandraFactory::CassandraFactory(const string& server_list)
   int_stream >> port;
 }
 
-
 CassandraFactory::CassandraFactory(const string& in_host, int in_port)
   :
     url(),
     host(in_host),
-    port(in_port)
+    port(in_port),
+    conn_timeout(-1),
+    recv_timeout(-1),
+    send_timeout(-1)
 {
   url.append(host);
   url.append(":");
@@ -59,13 +64,28 @@ CassandraFactory::CassandraFactory(const string& in_host, int in_port)
   url.append(port_str.str());
 }
 
+CassandraFactory::CassandraFactory(const string& in_host, int in_port, int in_timeout)
+  :
+    url(),
+    host(in_host),
+    port(in_port),
+    conn_timeout(in_timeout),
+    recv_timeout(in_timeout),
+    send_timeout(in_timeout)
+{
+  url.append(host);
+  url.append(":");
+  ostringstream port_str;
+  port_str << port;
+  url.append(port_str.str());
+}
 
 CassandraFactory::~CassandraFactory() {}
 
 
 tr1::shared_ptr<Cassandra> CassandraFactory::create()
 {
-  CassandraClient *thrift_client= createThriftClient(host, port);
+  CassandraClient *thrift_client= createThriftClient(host, port, conn_timeout, recv_timeout, send_timeout);
   tr1::shared_ptr<Cassandra> ret(new Cassandra(thrift_client, host, port));
   return ret;
 }
@@ -73,17 +93,31 @@ tr1::shared_ptr<Cassandra> CassandraFactory::create()
 
 tr1::shared_ptr<Cassandra> CassandraFactory::create(const string& keyspace)
 {
-  CassandraClient *thrift_client= createThriftClient(host, port);
+  CassandraClient *thrift_client= createThriftClient(host, port, conn_timeout, recv_timeout, send_timeout);
   tr1::shared_ptr<Cassandra> ret(new Cassandra(thrift_client, host, port, keyspace));
   return ret;
 }
 
 
-CassandraClient *CassandraFactory::createThriftClient(const string& in_host,
-                                                      int in_port)
+CassandraClient *CassandraFactory::createThriftClient(const string &in_host,
+                                                      int in_port,
+                                                      int in_conn_timeout,
+                                                      int in_recv_timeout,
+                                                      int in_send_timeout)
 {
-  boost::shared_ptr<TTransport> socket(new TSocket(in_host, in_port));
-  boost::shared_ptr<TTransport> transport= boost::shared_ptr<TTransport>(new TFramedTransport(socket));
+  boost::shared_ptr<TSocket> socket(new TSocket(in_host, in_port));
+
+  if (in_conn_timeout >= 0) {
+    socket->setConnTimeout(in_conn_timeout);
+  }
+  if (in_recv_timeout >= 0) {
+    socket->setRecvTimeout(in_recv_timeout);
+  }
+  if (in_send_timeout >= 0) {
+    socket->setSendTimeout(in_send_timeout);
+  }
+
+  boost::shared_ptr<TTransport> transport = boost::shared_ptr<TTransport>(new TFramedTransport(socket));
   boost::shared_ptr<TProtocol> protocol(new TBinaryProtocol(transport));
   CassandraClient *client= new(std::nothrow) CassandraClient(protocol);
 

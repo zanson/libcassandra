@@ -39,6 +39,7 @@ public:
 
   CassandraFactory(const std::string& server_list);
   CassandraFactory(const std::string& in_host, int in_port);
+  CassandraFactory(const std::string& in_host, int in_port, int in_timeout);
   ~CassandraFactory();
 
   /**
@@ -69,14 +70,21 @@ public:
 
 private:
 
-  org::apache::cassandra::CassandraClient *createThriftClient(const std::string& host,
-                                                              int port);
-
   std::string url;
+
+  org::apache::cassandra::CassandraClient *createThriftClient(const std::string &host,
+                                                              int port,
+							      int conn_timeout,
+							      int recv_timeout,
+							      int send_timeout
+							      );
 
   std::string host;
 
   int port;
+  int conn_timeout;
+  int recv_timeout;
+  int send_timeout;
 
 };
 
