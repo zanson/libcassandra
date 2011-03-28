@@ -1,8 +1,12 @@
-dnl  Copyright (C) 2010 Padraig O'Sullivan
-dnl This file is free software; Padraig O'Sullivan
+dnl -*- mode: m4; c-basic-offset: 2; indent-tabs-mode: nil; -*-
+dnl vim:expandtab:shiftwidth=2:tabstop=2:smarttab:
+dnl   
+dnl Copyright (C) 2010 Padraig O'Sullivan
+dnl This file is free software; 
 dnl gives unlimited permission to copy and/or distribute it,
 dnl with or without modifications, as long as this notice is preserved.
- 
+dnl
+
 AC_DEFUN([_PANDORA_SEARCH_THRIFT],[
   AC_REQUIRE([AC_LIB_PREFIX])
  
