@@ -320,20 +320,34 @@ SuperColumn Cassandra::getSuperColumn(const string& key,
   return getSuperColumn(key, column_family, super_column_name, ConsistencyLevel::QUORUM);
 }
 
-
-vector<Column> Cassandra::getSliceNames(const string& key,
-                                        const ColumnParent& col_parent,
-                                        SlicePredicate& pred,
-                                        ConsistencyLevel::type level)
+vector<Column> Cassandra::getColumns(
+    const string &key,
+    const string &column_family,
+    const string &super_column_name,
+    const vector<string> column_names,
+    org::apache::cassandra::ConsistencyLevel::type level
+    )
 {
+
+  ColumnParent col_parent;
+  SlicePredicate pred;
   vector<ColumnOrSuperColumn> ret_cosc;
   vector<Column> result;
-  /* damn you thrift! */
+
+  col_parent.column_family.assign(column_family);
+  if (! super_column_name.empty()) 
+  {
+    col_parent.super_column.assign(super_column_name);
+    col_parent.__isset.super_column= true;
+  }
+
+  pred.column_names = column_names;
   pred.__isset.column_names= true;
+
   thrift_client->get_slice(ret_cosc, key, col_parent, pred, level);
   for (vector<ColumnOrSuperColumn>::iterator it= ret_cosc.begin();
-       it != ret_cosc.end();
-       ++it)
+      it != ret_cosc.end();
+      ++it)
   {
     if (! (*it).column.name.empty())
     {
@@ -343,28 +357,62 @@ vector<Column> Cassandra::getSliceNames(const string& key,
   return result;
 }
 
-
-vector<Column> Cassandra::getSliceNames(const string& key,
-                                        const ColumnParent& col_parent,
-                                        SlicePredicate& pred)
+vector<Column> Cassandra::getColumns(
+    const string &key,
+    const string &column_family,
+    const string &super_column_name,
+    const vector<string> column_names
+    )
 {
-  return getSliceNames(key, col_parent, pred, ConsistencyLevel::QUORUM);
+	return getColumns(key, column_family, super_column_name, column_names, ConsistencyLevel::QUORUM);
 }
 
-
-vector<Column> Cassandra::getSliceRange(const string& key,
-                                        const ColumnParent& col_parent,
-                                        SlicePredicate& pred,
-                                        ConsistencyLevel::type level)
+vector<Column> Cassandra::getColumns(
+    const string &key,
+    const string &column_family,
+    const vector<string> column_names,
+    org::apache::cassandra::ConsistencyLevel::type level
+    )
 {
+  return getColumns(key, column_family, "", column_names, level);
+}
+
+vector<Column> Cassandra::getColumns(
+    const string &key,
+    const string &column_family,
+    const vector<string> column_names
+    )
+{
+  return getColumns(key, column_family, "", column_names, ConsistencyLevel::QUORUM);
+}
+
+vector<Column> Cassandra::getColumns(const string &key,
+                           const std::string &column_family,
+                           const std::string &super_column_name,
+                           const org::apache::cassandra::SliceRange &range,
+			   org::apache::cassandra::ConsistencyLevel::type level
+			   )
+{
+
+  ColumnParent col_parent;
+  SlicePredicate pred;
   vector<ColumnOrSuperColumn> ret_cosc;
   vector<Column> result;
-  /* damn you thrift! */
+
+  col_parent.column_family.assign(column_family);
+  if (! super_column_name.empty()) 
+  {
+    col_parent.super_column.assign(super_column_name);
+    col_parent.__isset.super_column= true;
+  }
+
+  pred.slice_range = range;
   pred.__isset.slice_range= true;
+
   thrift_client->get_slice(ret_cosc, key, col_parent, pred, level);
   for (vector<ColumnOrSuperColumn>::iterator it= ret_cosc.begin();
-       it != ret_cosc.end();
-       ++it)
+      it != ret_cosc.end();
+      ++it)
   {
     if (! (*it).column.name.empty())
     {
@@ -374,12 +422,105 @@ vector<Column> Cassandra::getSliceRange(const string& key,
   return result;
 }
 
-
-vector<Column> Cassandra::getSliceRange(const string& key,
-                                        const ColumnParent& col_parent,
-                                        SlicePredicate& pred)
+vector<Column> Cassandra::getColumns(const string &key,
+                           const std::string &column_family,
+                           const std::string &super_column_name,
+                           const org::apache::cassandra::SliceRange &range
+			   )
 {
-  return getSliceRange(key, col_parent, pred, ConsistencyLevel::QUORUM);
+	return getColumns(key, column_family, super_column_name, range, ConsistencyLevel::QUORUM);
+}
+
+vector<Column> Cassandra::getColumns(const string &key,
+                           const std::string &column_family,
+                           const org::apache::cassandra::SliceRange &range,
+			   org::apache::cassandra::ConsistencyLevel::type level
+			   )
+{
+  return getColumns(key, column_family, "", range, level);
+}
+
+vector<Column> Cassandra::getColumns(const string &key,
+                           const std::string &column_family,
+                           const org::apache::cassandra::SliceRange &range
+			   )
+{
+  return getColumns(key, column_family, "", range, ConsistencyLevel::QUORUM);
+}
+
+vector<SuperColumn> Cassandra::getSuperColumns(
+  const string& key,
+  const string &column_family,
+  const vector<string> super_column_names,
+  ConsistencyLevel::type level)
+{
+  ColumnParent col_parent;
+  SlicePredicate pred;
+  vector<ColumnOrSuperColumn> ret_cosc;
+  vector<SuperColumn> result;
+
+  col_parent.column_family.assign(column_family);
+
+  pred.column_names = super_column_names;
+  pred.__isset.column_names= true;
+
+  thrift_client->get_slice(ret_cosc, key, col_parent, pred, level);
+  for (vector<ColumnOrSuperColumn>::iterator it= ret_cosc.begin();
+       it != ret_cosc.end();
+       ++it)
+  {
+    if (! (*it).super_column.name.empty())
+    {
+      result.push_back((*it).super_column);
+    }
+  }
+  return result;
+}
+
+vector<SuperColumn> Cassandra::getSuperColumns(
+  const string& key,
+  const string &column_family,
+  const vector<string> super_column_names)
+{
+  return getSuperColumns(key, column_family, super_column_names, ConsistencyLevel::QUORUM);
+}
+
+vector<SuperColumn> Cassandra::getSuperColumns(
+    const string& key,
+    const string& column_family,
+    const org::apache::cassandra::SliceRange &range,
+    ConsistencyLevel::type level)
+{
+  ColumnParent col_parent;
+  SlicePredicate pred;
+  vector<ColumnOrSuperColumn> ret_cosc;
+  vector<SuperColumn> result;
+
+  col_parent.column_family.assign(column_family);
+
+  pred.slice_range = range;
+  pred.__isset.slice_range= true;
+
+  thrift_client->get_slice(ret_cosc, key, col_parent, pred, level);
+  for (vector<ColumnOrSuperColumn>::iterator it= ret_cosc.begin();
+       it != ret_cosc.end();
+       ++it)
+  {
+    if (! (*it).super_column.name.empty())
+    {
+      result.push_back((*it).super_column);
+    }
+  }
+  return result;
+}
+
+
+vector<SuperColumn> Cassandra::getSuperColumns(
+    const string& key,
+    const string& column_family,
+    const org::apache::cassandra::SliceRange &range)
+{
+  return getSuperColumns(key, column_family, range, ConsistencyLevel::QUORUM);
 }
 
 
