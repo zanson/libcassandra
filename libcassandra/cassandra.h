@@ -345,7 +345,7 @@ public:
                      const int32_t count);
 
   /**
-   * Return a list of slices using the given query object
+   * Returns a list of slices using the given query object
    * @param[in] query object that encapuslates everything needed
    *                  for a query using secondary indexes
    * @return a map of row keys to column names and values
@@ -420,6 +420,13 @@ public:
    * @return port number
    */
   int getPort() const;
+
+  /**
+   * Gets the token ring; a map of ranges to host addresses. Represented as a set of TokenRange
+   * @param[in] keyspace the name of the keyspace
+   * @return token ring map
+   */
+  std::vector<org::apache::cassandra::TokenRange> describeRing(std::string keyspace);
 
 private:
 

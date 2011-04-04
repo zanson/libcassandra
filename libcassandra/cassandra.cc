@@ -132,6 +132,11 @@ void Cassandra::insertColumn(const string& key,
     col.ttl=ttl;
     col.__isset.ttl=true;
   }
+
+
+  if ((int)key.size() ==0){
+      level = ConsistencyLevel::QUORUM; 
+  }  
   /* 
    * actually perform the insert 
    * TODO - validate the ColumnParent before the insert
@@ -329,7 +334,7 @@ vector<Column> Cassandra::getSliceNames(const string& key,
   vector<ColumnOrSuperColumn> ret_cosc;
   vector<Column> result;
   /* damn you thrift! */
-  pred.__isset.column_names= true;
+//  pred.__isset.column_names= true;
   thrift_client->get_slice(ret_cosc, key, col_parent, pred, level);
   for (vector<ColumnOrSuperColumn>::iterator it= ret_cosc.begin();
        it != ret_cosc.end();
@@ -606,6 +611,15 @@ string Cassandra::getHost()
 int Cassandra::getPort() const
 {
   return port;
+}
+
+
+std::vector<org::apache::cassandra::TokenRange> Cassandra::describeRing(std::string keyspace) {
+
+  vector<org::apache::cassandra::TokenRange> ret;
+  thrift_client->describe_ring(ret, keyspace);
+  return ret;
+   
 }
 
 
