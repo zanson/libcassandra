@@ -73,8 +73,7 @@ tr1::shared_ptr<Cassandra> CassandraFactory::create()
 
 tr1::shared_ptr<Cassandra> CassandraFactory::create(const string& keyspace)
 {
-//  CassandraClient *thrift_client= createThriftClient(host, port);
-  CassandraClient *thrift_client = 0;
+  CassandraClient *thrift_client= createThriftClient(host, port);
   tr1::shared_ptr<Cassandra> ret(new Cassandra(thrift_client, host, port, keyspace));
   return ret;
 }
