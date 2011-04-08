@@ -15,6 +15,7 @@
 #include <set>
 #include <map>
 #include <tr1/memory>
+#include <tr1/tuple>
 
 #include "libgenthrift/cassandra_types.h"
 
@@ -42,30 +43,18 @@ class Cassandra
 
 public:
 
-  typedef std::map<
-            std::string,      //key
-            std::map<
-                std::string,  //column family
-                std::vector<  //columns
-                    std::pair<std::string, std::string> 
-                > 
-            > 
-        > ColumnInsertsMap;
+  typedef std::tr1::tuple<std::string,  //column family
+                          std::string,  //key
+                          std::string,  //name
+                          std::string   //value
+                         > ColumnInsertTuple;
 
-  typedef std::map<
-            std::string,      //key
-            std::map<
-                std::string,  //column family
-                std::vector< 
-                    std::pair<
-                        std::string,  //super_column
-                        std::vector<  //columns
-                            std::pair<std::string, std::string> 
-                        > 
-                    > 
-                > 
-            > 
-        > SuperColumnInsertsMap;
+  typedef std::tr1::tuple<std::string,  //column family
+                          std::string,  //key
+                          std::string,  //supercolumn
+                          std::string,  //name
+                          std::string   //value
+                         > SuperColumnInsertTuple;
 
 public:
 
@@ -455,38 +444,10 @@ public:
    */
   std::vector<org::apache::cassandra::TokenRange> describeRing(const std::string &keyspace);
 
-  /**
-   *
-   *
-   */
-  void batchInsert(const ColumnInsertsMap &column_inserts, 
-                    const SuperColumnInsertsMap &super_column_inserts,
-                    org::apache::cassandra::ConsistencyLevel::type level); 
 
-  void batchInsert(const ColumnInsertsMap &column_inserts, 
-                    const SuperColumnInsertsMap &super_column_inserts); 
-
-  void batchInsert(const ColumnInsertsMap &column_inserts, 
-                    org::apache::cassandra::ConsistencyLevel::type level);
-  
-  void batchInsert(const ColumnInsertsMap &column_inserts);
-
-  void batchInsert(const SuperColumnInsertsMap &super_column_inserts,
-                    org::apache::cassandra::ConsistencyLevel::type level); 
-  
-  void batchInsert(const SuperColumnInsertsMap &super_column_inserts); 
-
-//  /**
-//   * Executes the specified mutations on the keyspace the outer map key is a row key, the inner 
-//   * map key is the column family name. A Mutation specifies either columns to insert or columns to delete
-//   * @see http://wiki.apache.org/cassandra/API
-//   * @param[in] mutations this map represent the operations to execute
-//   * @param[in] level desired consistency for the operation
-//   */
-//  void batchMutate(const std::map<std::string, std::map<std::string, std::vector<org::apache::cassandra::Mutation> > >  &mutations, 
-//                    org::apache::cassandra::ConsistencyLevel::type level);
-//   
-//  void batchMutate(const std::map<std::string, std::map<std::string, std::vector<org::apache::cassandra::Mutation> > >  &mutations);
+  void batchInsert(const std::vector<ColumnInsertTuple> &columns,
+                   const std::vector<SuperColumnInsertTuple> &super_columns, 
+                   org::apache::cassandra::ConsistencyLevel::type level);
 
 private:
   /**
@@ -513,11 +474,9 @@ private:
                            > 
                   > MutationsMap;
 
-  static void translate(const ColumnInsertsMap &inserts,
-                        MutationsMap &mutations);
+  static void addToMap(const ColumnInsertTuple &tuple, MutationsMap &mutations); 
 
-  static void translate(const SuperColumnInsertsMap &inserts,
-                        MutationsMap &mutations);
+  static void addToMap(const SuperColumnInsertTuple &tuple, MutationsMap &mutations); 
 
 };
 

@@ -622,162 +622,117 @@ std::vector<org::apache::cassandra::TokenRange> Cassandra::describeRing(const st
    
 }
 
-void Cassandra::batchInsert(const ColumnInsertsMap &column_inserts, 
-                             const SuperColumnInsertsMap &super_column_inserts,
-                             org::apache::cassandra::ConsistencyLevel::type level) {
-
+void Cassandra::batchInsert(const std::vector<ColumnInsertTuple> &columns,
+                   const std::vector<SuperColumnInsertTuple> &super_columns, 
+                   org::apache::cassandra::ConsistencyLevel::type level) {
   MutationsMap mutations;
 
-  translate(column_inserts, mutations);
-  translate(super_column_inserts, mutations);
+  for (std::vector<ColumnInsertTuple>::const_iterator column = columns.begin();
+       column != columns.end(); column++) {
+    addToMap(*column, mutations);
+  }
+
+  for (std::vector<SuperColumnInsertTuple>::const_iterator super_column = super_columns.begin();
+       super_column != super_columns.end(); super_column++) {
+    addToMap(*super_column, mutations);
+  }
 
   thrift_client->batch_mutate(mutations, level);
 }
 
-void Cassandra::batchInsert(const ColumnInsertsMap &column_inserts, 
-                             const SuperColumnInsertsMap &super_column_inserts) {
-  batchInsert(column_inserts, super_column_inserts, ConsistencyLevel::QUORUM); 
+void Cassandra::addToMap(const ColumnInsertTuple &tuple, MutationsMap &mutations) {
+
+  std::string column_family = std::tr1::get<0>(tuple);
+  std::string key           = std::tr1::get<1>(tuple);
+  std::string name          = std::tr1::get<2>(tuple);
+  std::string value         = std::tr1::get<3>(tuple);
+
+  org::apache::cassandra::Mutation mutation;
+
+  mutation.column_or_supercolumn.column.name      = name; 
+  mutation.column_or_supercolumn.column.value     = value; 
+  mutation.column_or_supercolumn.column.timestamp = createTimestamp(); 
+  mutation.column_or_supercolumn.__isset.column   = true;
+  mutation.__isset.column_or_supercolumn          = true;
+
+  if (mutations.find(key) == mutations.end()) {
+    mutations[key] = std::map<std::string, 
+                     std::vector<org::apache::cassandra::Mutation> >();
+  } 
+
+  std::map<std::string, 
+             std::vector<org::apache::cassandra::Mutation> 
+          > &mutations_per_cf = mutations[key];
+
+  if (mutations_per_cf.find(column_family) == mutations_per_cf.end()) {
+    mutations_per_cf[column_family] = std::vector<org::apache::cassandra::Mutation>();
+  }
+
+  std::vector<org::apache::cassandra::Mutation> &mutation_list = mutations_per_cf[column_family];
+
+  mutation_list.push_back(mutation);
+
 }
 
-void Cassandra::batchInsert(const ColumnInsertsMap &column_inserts, 
-                             org::apache::cassandra::ConsistencyLevel::type level) {
-  batchInsert(column_inserts, SuperColumnInsertsMap(), level);
+void Cassandra::addToMap(const SuperColumnInsertTuple &tuple, MutationsMap &mutations) {
+
+  std::string column_family = std::tr1::get<0>(tuple);
+  std::string key           = std::tr1::get<1>(tuple);
+  std::string super_column  = std::tr1::get<2>(tuple);
+  std::string name          = std::tr1::get<3>(tuple);
+  std::string value         = std::tr1::get<4>(tuple);
+
+  std::cout << __FILE__ << ":" << __LINE__ << endl;
+
+  if (mutations.find(key) == mutations.end()) {
+    mutations[key] = std::map<std::string, std::vector<org::apache::cassandra::Mutation> >();
+  } 
+
+  std::map<std::string, 
+             std::vector<org::apache::cassandra::Mutation> 
+          > &mutations_per_cf = mutations[key];
+
+  if (mutations_per_cf.find(column_family) == mutations_per_cf.end()) {
+    mutations_per_cf[column_family] = std::vector<org::apache::cassandra::Mutation>();
+  }
+
+  std::vector<org::apache::cassandra::Mutation> &mutation_list = mutations_per_cf[column_family];
+
+  org::apache::cassandra::Mutation mutation;
+
+  //this is awful, is there a better way?
+
+  for (std::vector<org::apache::cassandra::Mutation>::iterator it = mutation_list.begin();
+       it != mutation_list.end(); it++) {
+
+    if (it->column_or_supercolumn.__isset.super_column &&  
+        it->column_or_supercolumn.super_column.name == super_column) {
+      mutation = *it;      
+      mutation_list.erase(it);
+      break;
+    }
+  }
+
+  mutation.column_or_supercolumn.super_column.name = super_column;
+  mutation.column_or_supercolumn.__isset.super_column = true;
+  mutation.__isset.column_or_supercolumn = true;
+
+  Column column;
+
+  column.name = name;
+  column.value = value;
+  column.timestamp = createTimestamp();
+
+  mutation.column_or_supercolumn.super_column.columns.push_back(column);
+
+  mutation_list.push_back(mutation);
 }
-  
-void Cassandra::batchInsert(const ColumnInsertsMap &column_inserts) {
-  batchInsert(column_inserts, SuperColumnInsertsMap(), ConsistencyLevel::QUORUM);
-}
-
-void Cassandra::batchInsert(const SuperColumnInsertsMap &super_column_inserts,
-                    org::apache::cassandra::ConsistencyLevel::type level) {
-  batchInsert(ColumnInsertsMap(), super_column_inserts, level);
-}
-  
-void Cassandra::batchInsert(const SuperColumnInsertsMap &super_column_inserts) {
-  batchInsert(ColumnInsertsMap(), super_column_inserts, ConsistencyLevel::QUORUM);
-}
-
-
-void Cassandra::translate(const ColumnInsertsMap &inserts, 
-                          MutationsMap &mutations) {
-
-  ColumnInsertsMap::const_iterator outer_iterator; 
-  std::map <std::string, std::vector <std::pair <std::string, std::string> > >::const_iterator inner_iterator;  
-  std::vector<std::pair<std::string, std::string> >::const_iterator columns_iterator;
-
-    for (outer_iterator = inserts.begin(); outer_iterator != inserts.end(); outer_iterator++)  {
-
-        std::string key = outer_iterator->first;
-        std::map <std::string, std::vector<org::apache::cassandra::Mutation> > per_cf_mutation;
-
-        for (inner_iterator = outer_iterator->second.begin(); 
-             inner_iterator != outer_iterator->second.end(); inner_iterator++) {
-
-            std::string column_family = inner_iterator->first;
-            std::vector<org::apache::cassandra::Mutation> insert_list;
-
-            for (columns_iterator = inner_iterator->second.begin(); 
-                 columns_iterator != inner_iterator->second.end(); columns_iterator++) {
-
-                org::apache::cassandra::Mutation mutation;
-                
-                std::string column_name = columns_iterator->first;
-                std::string column_value = columns_iterator->second;
-
-                mutation.column_or_supercolumn.column.name  = column_name;
-                mutation.column_or_supercolumn.column.value = column_value;
-                mutation.column_or_supercolumn.column.timestamp = createTimestamp();
-
-                mutation.column_or_supercolumn.__isset.column = true;
-                mutation.__isset.column_or_supercolumn = true;
-
-                insert_list.push_back(mutation);
-            }
-            per_cf_mutation[column_family] = insert_list;
-        }
-        mutations[key] = per_cf_mutation;
-    }    
-}
-
-void Cassandra::translate(const SuperColumnInsertsMap &inserts, 
-                          MutationsMap &mutations) {
-
-    SuperColumnInsertsMap::const_iterator outer_iterator;
-
-    std::map<std::string, std::vector<std::pair<std::string, 
-              std::vector<std::pair<std::string,std::string> > > > >::const_iterator inner_iterator;
-
-    std::vector<std::pair<std::string, std::vector<std::pair<std::string, 
-              std::string> > > >::const_iterator super_columns_iterator;
-
-    std::vector<std::pair<std::string, std::string> >::const_iterator columns_iterator;
-
-    for (outer_iterator = inserts.begin(); outer_iterator != inserts.end(); outer_iterator++)  {
-
-        std::string key = outer_iterator->first;
-
-        std::map<std::string, std::vector<org::apache::cassandra::Mutation> > per_cf_mutation;
-
-        for (inner_iterator = outer_iterator->second.begin(); 
-             inner_iterator != outer_iterator->second.end(); inner_iterator++) {
-
-            std::string column_family = inner_iterator->first;
-
-            std::vector<org::apache::cassandra::Mutation> insert_list;
-
-            for (super_columns_iterator = inner_iterator->second.begin(); 
-                 super_columns_iterator != inner_iterator->second.end(); super_columns_iterator++) {
-
-                org::apache::cassandra::Mutation mutation;
-                
-                std::string super_column_name = super_columns_iterator->first;
-
-                std::vector<org::apache::cassandra::Column> columns;
-
-                for (columns_iterator = super_columns_iterator->second.begin();
-                     columns_iterator != super_columns_iterator->second.end(); columns_iterator++) {
-                
-                    Column column;
-                    column.name = columns_iterator->first;
-                    column.value = columns_iterator->second;
-                    column.timestamp = createTimestamp();
-
-                    columns.push_back(column);
-
-                }
-
-                mutation.column_or_supercolumn.super_column.name    = super_column_name;
-                mutation.column_or_supercolumn.super_column.columns = columns;
-
-                mutation.column_or_supercolumn.__isset.super_column = true;
-                mutation.__isset.column_or_supercolumn = true;
-
-                insert_list.push_back(mutation);
-            
-            }
-            per_cf_mutation[column_family] = insert_list;
-        }
-        mutations[key] = per_cf_mutation;
-    }    
-}
-
-//////////////////////////////////////////////////////////////////////////////////////////////////////
-//void Cassandra::batchMutate(const std::map<std::string, std::map<std::string, std::vector<org::apache::cassandra::Mutation> > >  &mutations, 
-//        org::apache::cassandra::ConsistencyLevel::type level) {
-//
-//  thrift_client->batch_mutate(mutations, level);
-//}
-//  
-//void Cassandra::batchMutate(const std::map<std::string, std::map<std::string, vector<org::apache::cassandra::Mutation> > >  &mutations) {
-//    batchMutate(mutations, ConsistencyLevel::QUORUM);
-//}
-//////////////////////////////////////////////////////////////////////////////////////////////////////
 
 bool Cassandra::findKeyspace(const string& name)
 {
   for (vector<KeyspaceDefinition>::iterator it= key_spaces.begin();
-       it != key_spaces.end();
-       ++it)
+      it != key_spaces.end();
+      ++it)
   {
     if (name == it->getName())
     {
