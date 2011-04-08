@@ -43,12 +43,17 @@ class Cassandra
 
 public:
 
+  /**
+    * enclosures the insertion of one column
+    */
   typedef std::tr1::tuple<std::string,  //column family
                           std::string,  //key
                           std::string,  //name
                           std::string   //value
                          > ColumnInsertTuple;
-
+  /**
+    * enclosures the insertion of one super column
+    */
   typedef std::tr1::tuple<std::string,  //column family
                           std::string,  //key
                           std::string,  //supercolumn
@@ -444,11 +449,18 @@ public:
    */
   std::vector<org::apache::cassandra::TokenRange> describeRing(const std::string &keyspace);
 
-
+  /**
+   * Inserts in the same call to cassandra a set of columns and supercolumns
+   * @param[in] columns to insert
+   * @param[in] super columns to insert
+   */
   void batchInsert(const std::vector<ColumnInsertTuple> &columns,
                    const std::vector<SuperColumnInsertTuple> &super_columns, 
                    org::apache::cassandra::ConsistencyLevel::type level);
 
+  void batchInsert(const std::vector<ColumnInsertTuple> &columns,
+                   const std::vector<SuperColumnInsertTuple> &super_columns); 
+ 
 private:
   /**
    * Finds the given keyspace in the list of keyspace definitions

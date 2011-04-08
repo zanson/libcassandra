@@ -640,6 +640,12 @@ void Cassandra::batchInsert(const std::vector<ColumnInsertTuple> &columns,
   thrift_client->batch_mutate(mutations, level);
 }
 
+void Cassandra::batchInsert(const std::vector<ColumnInsertTuple> &columns,
+                   const std::vector<SuperColumnInsertTuple> &super_columns) {
+
+  batchInsert(columns, super_columns, ConsistencyLevel::QUORUM);
+}
+
 void Cassandra::addToMap(const ColumnInsertTuple &tuple, MutationsMap &mutations) {
 
   std::string column_family = std::tr1::get<0>(tuple);
