@@ -688,8 +688,6 @@ void Cassandra::addToMap(const SuperColumnInsertTuple &tuple, MutationsMap &muta
   std::string name          = std::tr1::get<3>(tuple);
   std::string value         = std::tr1::get<4>(tuple);
 
-  std::cout << __FILE__ << ":" << __LINE__ << endl;
-
   if (mutations.find(key) == mutations.end()) {
     mutations[key] = std::map<std::string, std::vector<org::apache::cassandra::Mutation> >();
   } 
