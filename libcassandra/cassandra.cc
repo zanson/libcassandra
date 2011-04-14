@@ -157,6 +157,17 @@ void Cassandra::insertColumn(const string& key,
 
 void Cassandra::insertColumn(const string& key,
                              const string& column_family,
+                             const string& super_column_name,
+                             const string& column_name,
+                             const int64_t value)
+{
+  insertColumn(key, column_family, super_column_name, column_name, serializeLong(value), ConsistencyLevel::QUORUM);
+}
+
+
+
+void Cassandra::insertColumn(const string& key,
+                             const string& column_family,
                              const string& column_name,
                              const string& value)
 {
