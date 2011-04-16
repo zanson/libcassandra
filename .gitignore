@@ -3,6 +3,8 @@
 *.la
 *.lo
 *.guess
+*~
+*.kdev4
 libtool
 ltmain.sh
 stamp-h1
@@ -22,6 +24,10 @@ config/top.h
 Makefile
 Makefile.in
 autom4te.cache/
+examples/.deps/
+examples/.libs/
+examples/ant_simple
+examples/simple
 libgenthrift/.deps/
 libcassandra/.deps/
 libcassandra/.dirstamp
@@ -33,9 +39,9 @@ libcassandra/util/.dirstamp
 libcassandra/util/.deps/.dirstamp
 libgenthrift/.libs/
 libgenthrift/.dirstamp
-libcassandra/.libs/
 libgenthrift/configure.h
 tests/.deps
 tests/.dirstamp
 tests/.libs
 tests/tests
+
