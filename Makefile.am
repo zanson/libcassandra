@@ -26,7 +26,7 @@ include libcassandra/include.am
 include tests/include.am
 
 TESTS += ${check_PROGRAMS}
-
+SUBDIRS += examples
 
 fedora:
 	rm -f ~/rpmbuild/RPMS/x86_64/libcassandra-$(VERSION)*.rpm

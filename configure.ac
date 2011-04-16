@@ -60,6 +60,7 @@ AS_IF([test "x$ac_cv_header_atomic_h" = "xyes"],[
 
 AC_CONFIG_FILES([
   Makefile
+  examples/Makefile
   libgenthrift/configure.h
   libcassandra/configure.h
   ])
