@@ -17,16 +17,17 @@ EXTRA_HEADERS =
 BUILT_SOURCES=
 EXTRA_DIST = 
 
-SUBDIRS =
+SUBDIRS = libgenthrift libcassandra examples
 
 test-docs:
 	(cd docs && $(MAKE) test-docs)
-include libgenthrift/include.am
-include libcassandra/include.am
+# include libgenthrift/include.am
+# include libcassandra/include.am
 include tests/include.am
 
 TESTS += ${check_PROGRAMS}
-SUBDIRS += examples
+
+
 
 fedora:
 	rm -f ~/rpmbuild/RPMS/x86_64/libcassandra-$(VERSION)*.rpm

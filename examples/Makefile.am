@@ -1,4 +1,5 @@
-bin_PROGRAMS =  simple ant_simple
+# bin_PROGRAMS =  simple ant_simple
+check_PROGRAMS = simple ant_simple
 
 simple_SOURCES = simple.cc
 simple_LDADD   = ../libcassandra/libcassandra.la -lthrift

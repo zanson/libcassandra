@@ -62,7 +62,9 @@ AC_CONFIG_FILES([
   Makefile
   examples/Makefile
   libgenthrift/configure.h
+  libgenthrift/Makefile
   libcassandra/configure.h
+  libcassandra/Makefile
   ])
 AC_OUTPUT
 
