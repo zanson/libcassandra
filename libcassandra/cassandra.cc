@@ -36,11 +36,23 @@ using namespace libcassandra;
 // ************************************************************************
 
 std::ostream& libcassandra::operator<< (std::ostream& os, const ColumnSlicePredicate & col_slice_predicate) {
-	os << "Column slice: '"<< col_slice_predicate.start << "'-'" << col_slice_predicate.finish << "' count: " << col_slice_predicate.count;
-	if ( col_slice_predicate.reversed) {
-		os << " reversed";
+	if (col_slice_predicate.__isset.slice_range) {
+		const org::apache::cassandra::SliceRange & slice_range = col_slice_predicate.slice_range;
+		os << "Columns slice: '"<< slice_range.start << "'..'" << slice_range.finish << "' count: " << slice_range.count;
+		if ( slice_range.reversed) {
+			os << " reversed";
+		}
+	} else if (col_slice_predicate.__isset.column_names) {
+		const std::vector<std::string>  & column_names = col_slice_predicate.column_names;
+		if (column_names.size() > 0 ) {
+			os << "Column names (" << column_names.size() << ") '" << column_names.front() << "', ... '" << column_names.back() <<"'";
+		} else {
+			os << "Zero columns ColumnSlicePredicate";
+		}
+	} else {
+		os << "Undefined state ColumnSlicePredicate";
 	}
-	return os;
+    return os;
 }
 
 
@@ -59,6 +71,9 @@ Cassandra::Cassandra()
 	key_spaces(),
 	token_map()
 {
+    // TODO: Move to common_constructor() ?
+    default_read_consistency_level =  org::apache::cassandra::ConsistencyLevel::QUORUM;
+    default_write_consistency_level =  org::apache::cassandra::ConsistencyLevel::QUORUM;
 }
 
 
@@ -74,7 +89,11 @@ Cassandra::Cassandra(CassandraClient *in_thrift_client,
     current_keyspace(),
     key_spaces(),
     token_map()
-{}
+{
+    // TODO: Move to common_constructor() ?
+    default_read_consistency_level =  org::apache::cassandra::ConsistencyLevel::QUORUM;
+    default_write_consistency_level =  org::apache::cassandra::ConsistencyLevel::QUORUM;
+}
 
 
 Cassandra::Cassandra(CassandraClient *in_thrift_client,
@@ -90,7 +109,11 @@ Cassandra::Cassandra(CassandraClient *in_thrift_client,
     current_keyspace(keyspace),
     key_spaces(),
     token_map()
-{}
+{
+    // TODO: Move to common_constructor() ?
+    default_read_consistency_level =  org::apache::cassandra::ConsistencyLevel::QUORUM;
+    default_write_consistency_level =  org::apache::cassandra::ConsistencyLevel::QUORUM;
+}
 
 
 Cassandra::~Cassandra()
@@ -518,6 +541,45 @@ vector<SuperColumn> Cassandra::getSuperColumns(
   }
   return result;
 }
+
+void Cassandra::get_columns(std::vector<org::apache::cassandra::Column> & result_columns,
+                            const std::string & key,
+                            const std::string & column_family,
+                            const ColumnSlicePredicate & column_slice_predicate,
+                            org::apache::cassandra::ConsistencyLevel::type consistency_level)
+{
+
+    ColumnParent col_parent;
+    //SlicePredicate pred;
+    vector<ColumnOrSuperColumn> ret_cosc;  // TODO: consider faster version returning vector<ColumnOrSuperColumn> without any copying
+
+    col_parent.column_family.assign(column_family);
+    /*
+    if (! super_column_name.empty())
+    {
+      col_parent.super_column.assign(super_column_name);
+      col_parent.__isset.super_column= true;
+    }
+    */
+
+    //pred.column_names = column_names;
+    //pred.__isset.column_names= true;
+
+    thrift_client->get_slice(ret_cosc, key, col_parent, column_slice_predicate, consistency_level);
+
+    result_columns.clear();
+    for (vector<ColumnOrSuperColumn>::iterator it= ret_cosc.begin();
+            it != ret_cosc.end();
+            ++it)
+    {
+        if (! it->column.name.empty())
+        {
+            result_columns.push_back(it->column);
+        }
+    }
+    return;
+}
+
 
 vector<SuperColumn> Cassandra::getSuperColumns(
   const string& key,

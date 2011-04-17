@@ -39,29 +39,36 @@ namespace libcassandra
 
 class Keyspace;
 
-class ColumnSlicePredicate : public org::apache::cassandra::SliceRange
+class ColumnSlicePredicate : public org::apache::cassandra::SlicePredicate
 /*
  * Represents column slice predicate
- * Extends org::apache::cassandra::SliceRange with default constructors
- * 
+ * Extends org::apache::cassandra::SlicePredicate with few useful constructors
  */
 {
 public:
 	static const int32_t default_count = 100;
-	inline ColumnSlicePredicate(const std::string & astart, const std::string & afinish, int32_t acount = default_count, bool areversed = false)
+	inline ColumnSlicePredicate(const std::string & start, const std::string & finish, int32_t count = default_count, bool reversed = false)
 	{
-		start = astart;
-		finish = afinish;
-		count = acount;
-		reversed = areversed;
+		slice_range.start = start;
+		slice_range.finish = finish;
+		slice_range.count = count;
+		slice_range.reversed = reversed;
+		__isset.slice_range= true;
 	};
-	inline ColumnSlicePredicate(const std::string & astart, const std::string & afinish, bool areversed) 
+	
+	inline ColumnSlicePredicate(const std::string & start, const std::string & finish, bool reversed) 
 	{
-		start = astart;
-		finish = afinish;
-		count = default_count;
-		reversed = areversed;
+		slice_range.start = start;
+		slice_range.finish = finish;
+		slice_range.count = default_count;
+		slice_range.reversed = reversed;
+		__isset.slice_range= true;
 	};
+	inline ColumnSlicePredicate(const std::vector<std::string>  & n_column_names) 
+	{
+		column_names = n_column_names;
+		__isset.column_names= true;
+	}
 	// inline void foo() const {};
 	friend std::ostream& operator<< (std::ostream& o, const ColumnSlicePredicate & col_slice_predicate);
 };
@@ -367,6 +374,29 @@ public:
   std::vector<org::apache::cassandra::Column> getColumns(const std::string &key,
                                                          const std::string &column_family,
                                                          const std::vector<std::string> column_names);
+  
+  
+  /*
+   * Retrieve multiple columns by column slice predicate
+   *
+   * @param[out] result_columns  the result
+   * @param[in] key the column key
+   * @param[in] column_family the column family
+   * @param[in] column_slice_predicate the list of column slice predicate
+   * @param[in] consistency_level Consistency level (optional)
+   */
+  void get_columns(std::vector<org::apache::cassandra::Column> & result_columns,
+		  const std::string & key,
+		  const std::string & column_family,
+		  const ColumnSlicePredicate & column_slice_predicate,
+		  org::apache::cassandra::ConsistencyLevel::type consistency_level);
+  
+  void inline get_columns(std::vector<org::apache::cassandra::Column> & result_columns,
+			  const std::string & key,
+			  const std::string & column_family,
+			  const ColumnSlicePredicate & column_slice_predicate) {
+	get_columns(result_columns, key, column_family, column_slice_predicate, default_read_consistency_level);
+  }
 
   /**
    * Retrieve multiple columns by range
@@ -567,6 +597,8 @@ private:
   std::string current_keyspace;
   std::vector<KeyspaceDefinition> key_spaces;
   std::map<std::string, std::string> token_map;
+  org::apache::cassandra::ConsistencyLevel::type default_read_consistency_level; // TODO: Make accessors
+  org::apache::cassandra::ConsistencyLevel::type default_write_consistency_level; // TODO: Make accessors
 
   Cassandra(const Cassandra&);
   Cassandra &operator=(const Cassandra&);

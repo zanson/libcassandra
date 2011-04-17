@@ -71,7 +71,7 @@ int main()
                                                              const std::string &super_column_name,
                                                              const org::apache::cassandra::SliceRange &range);
          */
-        std::vector<org::apache::cassandra::Column> columns;
+        std::vector<org::apache::cassandra::Column> result_columns;
 	
         org::apache::cassandra::SliceRange slice_range;
         slice_range.start = "first";
@@ -79,10 +79,17 @@ int main()
 	
         // columns = client->getColumns("sarah","Data","",slice_range);
 	cout << "Quering using " << ColumnSlicePredicate("first","third") << endl;
-        columns = client->getColumns("sarah","Data","",ColumnSlicePredicate("first","third"));
+        client->get_columns(result_columns, "sarah","Data",ColumnSlicePredicate("first","third"));
 	
-        cout << "Got " << columns.size() << " columns as range query result." << endl;
-        for ( std::vector<org::apache::cassandra::Column>::iterator itr = columns.begin(); itr != columns.end(); itr++ ) {
+        cout << "Got " << result_columns.size() << " columns as range query result." << endl;
+        for ( std::vector<org::apache::cassandra::Column>::iterator itr = result_columns.begin(); itr != result_columns.end(); itr++ ) {
+            cout << "Got column: '" << itr->name << "' : '" << itr->value << "' timestamp: " << itr->timestamp << " ttl: " << itr->ttl << endl;
+        }
+	cout << "Quering using " << ColumnSlicePredicate("first","third",2) << endl;
+        client->get_columns(result_columns, "sarah","Data",ColumnSlicePredicate("first","third",2));
+	
+        cout << "Got " << result_columns.size() << " columns as range query result." << endl;
+        for ( std::vector<org::apache::cassandra::Column>::iterator itr = result_columns.begin(); itr != result_columns.end(); itr++ ) {
             cout << "Got column: '" << itr->name << "' : '" << itr->value << "' timestamp: " << itr->timestamp << " ttl: " << itr->ttl << endl;
         }
 
