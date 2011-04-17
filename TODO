@@ -2,32 +2,55 @@ List of TODOs:
 --------------------------------------------------
 TODO: Agree  on general rules of arg passing
 
+--------------------------------------------------
+TODO: Agree on library versioning system with SONAMEs
+Currently we have: 
+	Configuration summary for libcassandra version 0.1
+Consider:
+	0.7.0.1
+	Cassandra line version . cassandra bugfix version. libcassandra interface_version . bugfix version
+
+--------------------------------------------------
+TODO: Agree on avoiding pointers.
+Describe state of each used pointer, including resposible or not for deallocating pointed object
+Use references to pass/access instaed of pointers. Like:
+  org::apache::cassandra::CassandraClient *getCassandra();
+becomes:
+  org::apache::cassandra::CassandraClient & getCassandra();
+	
+Switch use to boost::shared_ptr instead (not std::tr1::shared_ptr as Thrift generated code seems to use boost::shared_ptr)
+where there is no other option.
 
 --------------------------------------------------
 TODO: Consider switching args order to:
  (CF, row_key, ... ) ?
-
+PRO: More logical to final user
+CON: Thrift natural is row_key first.
 
 --------------------------------------------------
-TODO: Implement default qurum for reads and writes.
-
+TODO: Implement default quorum for reads and writes used when no quorum level is passed.
 
 --------------------------------------------------
 TODO: Regen libgenthrift for current 0.7.x 
-(quorom levels  TWO, THREE).
+(quorum levels  TWO, THREE).
+
+--------------------------------------------------
+TODO: Consider not installing libgenthrift as shared lib ?
+Is it for internal libcassandra use only ?
+
+Do we need installed include/libgenthrift ?
+Is libgenthrift going to be used by anything else than libcassandra ?
 
 
 --------------------------------------------------
-TODO: Split Makefile.ams to standard DIRS layout
-	
+TODO: Check and validate split Makefile.ams to standard DIRS layout
 
 --------------------------------------------------
-TODO: Client aware of cassandra nodes, trying next ones whan first on list is not available
-
+TODO: Write client aware of cassandra nodes, trying next ones whan first on list is not available
 
 --------------------------------------------------
-TODO: Higher level client, able to connect to many hosts in cluster 
-
+TODO: Write higher level client, able to connect to many hosts in cluster ?
+Far future.
 Transparently dealing with nodes downs/ups (if possible).
 Allowing async queries ?
 Connection pool.
