@@ -1,0 +1,34 @@
+List of TODOs:
+--------------------------------------------------
+TODO: Agree  on general rules of arg passing
+
+
+--------------------------------------------------
+TODO: Consider switching args order to:
+ (CF, row_key, ... ) ?
+
+
+--------------------------------------------------
+TODO: Implement default qurum for reads and writes.
+
+
+--------------------------------------------------
+TODO: Regen libgenthrift for current 0.7.x 
+(quorom levels  TWO, THREE).
+
+
+--------------------------------------------------
+TODO: Split Makefile.ams to standard DIRS layout
+	
+
+--------------------------------------------------
+TODO: Client aware of cassandra nodes, trying next ones whan first on list is not available
+
+
+--------------------------------------------------
+TODO: Higher level client, able to connect to many hosts in cluster 
+
+Transparently dealing with nodes downs/ups (if possible).
+Allowing async queries ?
+Connection pool.
+Connection pool with priority on localhost ?
