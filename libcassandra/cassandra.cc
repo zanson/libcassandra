@@ -31,6 +31,23 @@ using namespace org::apache::cassandra;
 using namespace libcassandra;
 
 
+// ************************************************************************
+// ColumnSlicePredicate
+// ************************************************************************
+
+std::ostream& libcassandra::operator<< (std::ostream& os, const ColumnSlicePredicate & col_slice_predicate) {
+	os << "Column slice: '"<< col_slice_predicate.start << "'-'" << col_slice_predicate.finish << "' count: " << col_slice_predicate.count;
+	if ( col_slice_predicate.reversed) {
+		os << " reversed";
+	}
+	return os;
+}
+
+
+// ************************************************************************
+// Cassandra
+// ************************************************************************
+ 
 Cassandra::Cassandra()
   :
     thrift_client(NULL),

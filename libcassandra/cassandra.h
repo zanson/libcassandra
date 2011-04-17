@@ -14,7 +14,9 @@
 #include <vector>
 #include <set>
 #include <map>
-#include <tr1/memory>
+#include <iostream>
+// TODO use boost::shared_ptr instead as used in Thrift generated code?:
+#include <tr1/memory>   
 
 #include "../libgenthrift/cassandra_types.h"
 
@@ -36,6 +38,35 @@ namespace libcassandra
 {
 
 class Keyspace;
+
+class ColumnSlicePredicate : public org::apache::cassandra::SliceRange
+/*
+ * Represents column slice predicate
+ * Extends org::apache::cassandra::SliceRange with default constructors
+ * 
+ */
+{
+public:
+	static const int32_t default_count = 100;
+	inline ColumnSlicePredicate(const std::string & astart, const std::string & afinish, int32_t acount = default_count, bool areversed = false)
+	{
+		start = astart;
+		finish = afinish;
+		count = acount;
+		reversed = areversed;
+	};
+	inline ColumnSlicePredicate(const std::string & astart, const std::string & afinish, bool areversed) 
+	{
+		start = astart;
+		finish = afinish;
+		count = default_count;
+		reversed = areversed;
+	};
+	// inline void foo() const {};
+	friend std::ostream& operator<< (std::ostream& o, const ColumnSlicePredicate & col_slice_predicate);
+};
+
+std::ostream& operator<< (std::ostream& os, const ColumnSlicePredicate & col_slice_predicate);
 
 class Cassandra
 {
