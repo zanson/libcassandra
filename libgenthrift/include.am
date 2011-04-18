@@ -28,5 +28,5 @@ libgenthrift_libgenthrift_la_CXXFLAGS= \
 				 ${AM_CXXFLAGS} 
 
 libgenthrift_libgenthrift_la_LIBADD= \
-				  $(LIBTHRIFT) 
+				  $(LTLIBTHRIFT) 
 
