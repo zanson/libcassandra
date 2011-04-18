@@ -37,7 +37,7 @@ libgenthrift_la_CXXFLAGS= \
 				 ${AM_CXXFLAGS} 
 
 libgenthrift_la_LIBADD= \
-				  $(LIBTHRIFT) \
-				  -lthrift   # Needed to libtool find dependency on libthrift
+				  $(LTLIBTHRIFT)
+
 
 
