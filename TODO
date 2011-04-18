@@ -24,7 +24,7 @@ where there is no other option.
 --------------------------------------------------
 TODO: Consider switching args order to:
  (CF, row_key, ... ) ?
-PRO: More logical to final user
+PRO: More logical to final user ?
 CON: Thrift natural is row_key first.
 
 --------------------------------------------------
@@ -40,6 +40,14 @@ Is it for internal libcassandra use only ?
 
 Do we need installed include/libgenthrift ?
 Is libgenthrift going to be used by anything else than libcassandra ?
+
+--------------------------------------------------
+TODO: Review and merge batch mutations from 
+https://github.com/axs-mvd/libcassandra
+
+--------------------------------------------------
+TODO: Review and merge ttl from 
+https://github.com/maxcom/libcassandra
 
 
 --------------------------------------------------
