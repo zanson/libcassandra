@@ -20,6 +20,7 @@ libcassandra_la_HEADERS = \
 			 keyspace.h \
 			 keyspace_definition.h \
 			 keyspace_factory.h \
+			 multihost_cassandra.h \
 			 util_functions.h \
 			 util/ping.h
 
@@ -35,6 +36,7 @@ libcassandra_la_SOURCES = \
 				       keyspace.cc \
 				       keyspace_definition.cc \
 				       keyspace_factory.cc \
+			 	       multihost_cassandra.cc \
 				       util_functions.cc \
 				       util/ping.cc
 
