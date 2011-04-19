@@ -538,8 +538,8 @@ int32_t Cassandra::getCount(const string& key,
 
 vector<KeyspaceDefinition> Cassandra::getKeyspaces()
 {
-  if (key_spaces.empty())
-  {
+//  if (key_spaces.empty())
+//  {
     vector<KsDef> thrift_ks_defs;
     thrift_client->describe_keyspaces(thrift_ks_defs);
     for (vector<KsDef>::iterator it= thrift_ks_defs.begin();
@@ -554,7 +554,7 @@ vector<KeyspaceDefinition> Cassandra::getKeyspaces()
                                thrift_entry.cf_defs);
       key_spaces.push_back(entry);
     }
-  }
+//  }
   return key_spaces;
 }
 
