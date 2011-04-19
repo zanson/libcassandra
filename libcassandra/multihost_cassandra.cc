@@ -69,9 +69,23 @@ libcassandra::MultihostCassandra::add_cluster_node(const std::string & host, int
 		// Host not available  state_row.cassandra stays NULL
 		cerr << "CERROR: Creating cassandra instance connected to " << host << ":" << port << " (timeout: " << socket_timeout << " ms)." << endl;
 	}
+	debug_print_state("add_cluster_node() finished");
 	return cassandra_states.size();
 }
 
 
+void 
+libcassandra::MultihostCassandra::debug_print_state(const std::string & state_name) {
+	clog << "CDEBUG: States (" << state_name << ") num:" << cassandra_states.size() << endl;
+	
+	for (std::vector<CassandraStateRow>::iterator state_it = cassandra_states.begin(); state_it != cassandra_states.end(); ++state_it)
+	{
+		clog << "CDEBUG: - " << *state_it << endl;
+	}
+}
 
-
+std::ostream & libcassandra::operator<< (std::ostream & os, const MultihostCassandra::CassandraStateRow & state_row)
+{
+	os << " " << state_row.cassandra.get() << " use count: " << state_row.cassandra.use_count();
+	return os;
+}

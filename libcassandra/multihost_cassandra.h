@@ -40,7 +40,9 @@ class MultihostCassandra
 {
 public:
 	MultihostCassandra(const std::string & n_keyspace, int n_socket_timeout = 10000);
-	
+private:
+	void common_constructor();
+public:
 	int add_cluster_node(const std::string & host, int port);
 		/**
 		* Adds node on which we should operate. All nodes must be from same cluster
@@ -48,9 +50,9 @@ public:
 		* @param[in] port
 		* @return  Final number of nodes in interface 
 		*/
+		
+	void debug_print_state(const std::string & state_name);
 	
-private:
-	void common_constructor();
 	class CassandraStateRow {
 		public:
 			CassandraStateRow() {
@@ -61,10 +63,17 @@ private:
 			 
 			enum state_t {init, operational} state; 
 	};
+private:
 	const std::string keyspace;
 	int socket_timeout;
 	std::vector<CassandraStateRow> cassandra_states;
+public:
+	friend std::ostream& operator<< (std::ostream& o, const CassandraStateRow & state_row);
+	
 };
+	
+
+std::ostream & operator<< (std::ostream & os, const MultihostCassandra::CassandraStateRow & state_row);
 
 } // namespace libcassandra
 
