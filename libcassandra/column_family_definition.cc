@@ -249,6 +249,20 @@ bool ColumnFamilyDefinition::isKeyCacheSizeSet() const
   return (key_cache_size > 0 ? true : false);
 }
 
+void ColumnFamilyDefinition::setKeyCacheSavePeriod(int32_t save_period)
+{
+  key_cache_save_period_in_seconds = save_period;
+}
+
+int32_t ColumnFamilyDefinition::getKeyCacheSavePeriod() const
+{
+  return key_cache_save_period_in_seconds;
+}
+
+bool ColumnFamilyDefinition::isKeyCacheSavePeriodSet() const
+{
+  return (key_cache_save_period_in_seconds > 0 ? true : false);
+}
 
 double ColumnFamilyDefinition::getReadRepairChance() const
 {

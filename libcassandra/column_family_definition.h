@@ -145,6 +145,18 @@ public:
   void setKeyCacheSize(double size);
 
   /**
+   * @return key cache save period in seconds
+   */
+  int32_t getKeyCacheSavePeriod() const;
+
+  void setKeyCacheSavePeriod(int32_t save_period);
+
+  /**
+   * @return true if key cache save period > 0; false otherwise
+   */
+  bool isKeyCacheSavePeriodSet() const;
+
+  /**
    * @return true if key cache size is > 0; false otherwise
    */
   bool isKeyCacheSizeSet() const;
