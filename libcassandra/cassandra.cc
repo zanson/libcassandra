@@ -540,6 +540,7 @@ vector<KeyspaceDefinition> Cassandra::getKeyspaces()
 {
   vector<KsDef> thrift_ks_defs;
   thrift_client->describe_keyspaces(thrift_ks_defs);
+  key_spaces.clear();
   for (vector<KsDef>::iterator it= thrift_ks_defs.begin();
          it != thrift_ks_defs.end();
          ++it)
