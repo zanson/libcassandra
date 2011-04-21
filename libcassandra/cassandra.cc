@@ -113,6 +113,8 @@ Cassandra::Cassandra(CassandraClient *in_thrift_client,
     // TODO: Move to common_constructor() ?
     default_read_consistency_level =  org::apache::cassandra::ConsistencyLevel::QUORUM;
     default_write_consistency_level =  org::apache::cassandra::ConsistencyLevel::QUORUM;
+    
+    setKeyspace(keyspace);
 }
 
 
@@ -542,7 +544,7 @@ vector<SuperColumn> Cassandra::getSuperColumns(
   return result;
 }
 
-void Cassandra::get_columns(std::vector<org::apache::cassandra::Column> & result_columns,
+void Cassandra::getColumns(std::vector<org::apache::cassandra::Column> & result_columns,
                             const std::string & key,
                             const std::string & column_family,
                             const ColumnSlicePredicate & column_slice_predicate,
@@ -552,26 +554,12 @@ void Cassandra::get_columns(std::vector<org::apache::cassandra::Column> & result
     ColumnParent col_parent;
     //SlicePredicate pred;
     vector<ColumnOrSuperColumn> ret_cosc;  // TODO: consider faster version returning vector<ColumnOrSuperColumn> without any copying
-
     col_parent.column_family.assign(column_family);
-    /*
-    if (! super_column_name.empty())
-    {
-      col_parent.super_column.assign(super_column_name);
-      col_parent.__isset.super_column= true;
-    }
-    */
-
-    //pred.column_names = column_names;
-    //pred.__isset.column_names= true;
-
     thrift_client->get_slice(ret_cosc, key, col_parent, column_slice_predicate, consistency_level);
-
     result_columns.clear();
     for (vector<ColumnOrSuperColumn>::iterator it= ret_cosc.begin();
             it != ret_cosc.end();
-            ++it)
-    {
+            ++it)  {
         if (! it->column.name.empty())
         {
             result_columns.push_back(it->column);
@@ -842,7 +830,7 @@ string Cassandra::getServerVersion()
 }
 
 
-string Cassandra::getHost()
+string Cassandra::getHost() const
 {
   return host;
 }
@@ -852,6 +840,14 @@ int Cassandra::getPort() const
 {
   return port;
 }
+
+string Cassandra::getNode() const
+{
+  std::ostringstream node_oss;
+  node_oss << getHost() << ":" << getPort();
+  return node_oss.str();
+}
+
 
 
 bool Cassandra::findKeyspace(const string& name)

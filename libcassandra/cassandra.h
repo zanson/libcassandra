@@ -16,7 +16,7 @@
 #include <map>
 #include <iostream>
 // TODO use boost::shared_ptr instead as used in Thrift generated code?:
-#include <tr1/memory>   
+// #include <tr1/memory>   
 
 #include "../libgenthrift/cassandra_types.h"
 
@@ -90,7 +90,7 @@ public:
             const std::string& keyspace);
   ~Cassandra();
 
-  enum FailoverPolicy
+  enum FailoverPolicy // TODO: Is it ever used now ?
   {
     FAIL_FAST= 0, /* return error as is to user */
     ON_FAIL_TRY_ONE_NEXT_AVAILABLE, /* try 1 random server before returning to user */
@@ -376,7 +376,7 @@ public:
                                                          const std::vector<std::string> column_names);
   
   
-  /*
+  /**
    * Retrieve multiple columns by column slice predicate
    *
    * @param[out] result_columns  the result
@@ -385,17 +385,17 @@ public:
    * @param[in] column_slice_predicate the list of column slice predicate
    * @param[in] consistency_level Consistency level (optional)
    */
-  void get_columns(std::vector<org::apache::cassandra::Column> & result_columns,
+  void getColumns(std::vector<org::apache::cassandra::Column> & result_columns,
 		  const std::string & key,
 		  const std::string & column_family,
 		  const ColumnSlicePredicate & column_slice_predicate,
 		  org::apache::cassandra::ConsistencyLevel::type consistency_level);
   
-  void inline get_columns(std::vector<org::apache::cassandra::Column> & result_columns,
+  void inline getColumns(std::vector<org::apache::cassandra::Column> & result_columns,
 			  const std::string & key,
 			  const std::string & column_family,
 			  const ColumnSlicePredicate & column_slice_predicate) {
-	get_columns(result_columns, key, column_family, column_slice_predicate, default_read_consistency_level);
+	getColumns(result_columns, key, column_family, column_slice_predicate, default_read_consistency_level);
   }
 
   /**
@@ -574,12 +574,18 @@ public:
   /**
    * @return hostname
    */
-  std::string getHost();
+  std::string getHost() const;
 
   /**
    * @return port number
    */
   int getPort() const;
+  
+  /**
+   * @return node adress in form hostname:port
+   */
+  std::string getNode() const;
+  
 
 private:
 
