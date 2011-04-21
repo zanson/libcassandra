@@ -12,22 +12,35 @@
 #include <libcassandra/keyspace.h>
 #include <libcassandra/keyspace_definition.h>
 
+#include <libcassandra/multihost_cassandra.h>
+
 using namespace std;
 using namespace libcassandra;
 
-static string host("appserver3.biuro.ant.vpn");
+static const string host("appserver3.biuro.ant.vpn");
 static int port= 9160;
-static int timeout= 5000;
+//static int timeout= 5000;
+static const string drizzle_keyspace("drizzle");
 
 int main()
 {
-
+/*
     CassandraFactory factory(host, port);
-    tr1::shared_ptr<Cassandra> client(factory.create());
+    boost::shared_ptr<Cassandra> client(factory.create());
+    boost::shared_ptr<Cassandra> client2(factory.create());
+    */
+    boost::shared_ptr<Cassandra> client (connect_cassandra_client(host, port, drizzle_keyspace) );
+    /*
+    boost::shared_ptr<Cassandra> client2 (connect_cassandra_client(host, port, drizzle_keyspace) );
+    try {
+	boost::shared_ptr<Cassandra> client3 (connect_cassandra_client("appserver2.biuro.ant.vpn", port, drizzle_keyspace) );
+    } catch (exception & e) {
+	cout << "Exception in client3." << endl;
+    }*/
 
     // Not really needed since the factory timeout sets all 3 by default:
-    client->setRecvTimeout(timeout);
-    client->setSendTimeout(timeout);
+    //client->setRecvTimeout(timeout);
+    //client->setSendTimeout(timeout);
 
     string clus_name= client->getClusterName();
     cout << "cluster name: " << clus_name << endl;
@@ -46,7 +59,7 @@ int main()
         ks_def.setName("drizzle");
         client->createKeyspace(ks_def);
         */
-        client->setKeyspace("drizzle");
+        //client->setKeyspace(drizzle_keyspace);
 
         /* create standard column family */
         /*
@@ -57,9 +70,11 @@ int main()
         */
 
         /* insert data */
+	/*
         client->insertColumn("sarah", "Data", "first", "this is data being inserted 1st!");
         client->insertColumn("sarah", "Data", "second", "this is data being inserted 2nd!");
         client->insertColumn("sarah", "Data", "third", "this is data being inserted 3rd!");
+        */
         /* retrieve that data */
         string res= client->getColumnValue("sarah", "Data", "first");
         cout << "Value in column retrieved as 1st is: " << res << endl;
@@ -79,24 +94,28 @@ int main()
 	
         // columns = client->getColumns("sarah","Data","",slice_range);
 	cout << "Quering using " << ColumnSlicePredicate("first","third") << endl;
-        client->get_columns(result_columns, "sarah","Data",ColumnSlicePredicate("first","third"));
+        client->getColumns(result_columns, "sarah","Data",ColumnSlicePredicate("first","third"));
 	
         cout << "Got " << result_columns.size() << " columns as range query result." << endl;
         for ( std::vector<org::apache::cassandra::Column>::iterator itr = result_columns.begin(); itr != result_columns.end(); itr++ ) {
             cout << "Got column: '" << itr->name << "' : '" << itr->value << "' timestamp: " << itr->timestamp << " ttl: " << itr->ttl << endl;
         }
 	cout << "Quering using " << ColumnSlicePredicate("first","third",2) << endl;
-        client->get_columns(result_columns, "sarah","Data",ColumnSlicePredicate("first","third",2));
+        client->getColumns(result_columns, "sarah","Data",ColumnSlicePredicate("first","third",2));
 	
         cout << "Got " << result_columns.size() << " columns as range query result." << endl;
         for ( std::vector<org::apache::cassandra::Column>::iterator itr = result_columns.begin(); itr != result_columns.end(); itr++ ) {
             cout << "Got column: '" << itr->name << "' : '" << itr->value << "' timestamp: " << itr->timestamp << " ttl: " << itr->ttl << endl;
         }
+        
+        // Non existing CF
+        res = client->getColumnValue("sarah", "Data-non-existing-CF", "first");
+	cout << "res: " << res << endl;
 
     }
     catch (org::apache::cassandra::InvalidRequestException &ire)
     {
-        cout << ire.why << endl;
+        cout << "Cought InvalidRequestException: " << ire.why << endl;
         return 1;
     }
 
