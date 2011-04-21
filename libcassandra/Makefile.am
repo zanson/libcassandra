@@ -22,7 +22,8 @@ libcassandra_la_HEADERS = \
 			 keyspace_factory.h \
 			 multihost_cassandra.h \
 			 util_functions.h \
-			 util/ping.h
+			 util/ping.h \
+			 util/timetools.h
 
 
 libcassandra_la_CXXFLAGS= ${AM_CXXFLAGS}
@@ -38,7 +39,8 @@ libcassandra_la_SOURCES = \
 				       keyspace_factory.cc \
 			 	       multihost_cassandra.cc \
 				       util_functions.cc \
-				       util/ping.cc
+				       util/ping.cc \
+				       util/timetools.cc
 
 libcassandra_la_DEPENDENCIES= ../libgenthrift/libgenthrift.la
 libcassandra_la_LIBADD= $(LIBM) ../libgenthrift/libgenthrift.la
