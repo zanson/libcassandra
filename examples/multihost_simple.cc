@@ -5,6 +5,7 @@
 #include <set>
 #include <string>
 #include <stdio.h>
+#include <unistd.h>
 
 #include <libcassandra/cassandra_factory.h>
 #include <libcassandra/cassandra.h>
@@ -13,6 +14,8 @@
 #include <libcassandra/keyspace_definition.h>
 #include <libcassandra/multihost_cassandra.h>
 
+#include <libcassandra/util/timetools.h>
+
 using namespace std;
 using namespace libcassandra;
 
@@ -20,9 +23,44 @@ static string host("appserver3.biuro.ant.vpn");
 static int port= 9160;
 //static int timeout= 5000;
 
+/*
+void static test_time() {
+	struct timeval  start_timeval;
+	gettimeofday(&start_timeval,NULL);
+	
+	struct timeval  start_plus10s_timeval = start_timeval;
+	start_plus10s_timeval.tv_sec += 10;
+	
+	cout << "CDEBUG: human_readable_timeval(start_timeval): " << human_readable_timeval(start_timeval) << endl;
+	cout << "CDEBUG: human_readable_timeval(start_plus10s_timeval): " << human_readable_timeval(start_plus10s_timeval) << endl;
+	struct timeval  now_timeval;
+	gettimeofday(&now_timeval,NULL);
+	cout << "CDEBUG: human_readable_timeval(now_timeval): " << human_readable_timeval(now_timeval) << endl;
+	cout << "CDEBUG: human_readable_timeval_now_delta( start_timeval): " << human_readable_timeval_now_delta( start_timeval) << endl;
+	cout << "CDEBUG: human_readable_timeval_now_delta( start_plus10s_timeval): " << human_readable_timeval_now_delta(start_plus10s_timeval) << endl;
+	
+	// timeval_seconds_delta(const struct timeval & t1, const struct timeval & t2)
+	cout << "CDEBUG: timeval_seconds_delta(now_timeval, start_timeval): " << timeval_seconds_delta(now_timeval, start_timeval) << " reverse: " <<  timeval_seconds_delta(start_timeval, now_timeval) << endl;
+	cout << "CDEBUG: timeval_seconds_delta(now_timeval, start_plus10s_timeval): " << timeval_seconds_delta(now_timeval, start_plus10s_timeval) << " reverse: " <<  timeval_seconds_delta(start_plus10s_timeval, now_timeval) << endl;
+
+	usleep(1000*1000 * 95 / 10);
+	gettimeofday(&now_timeval,NULL);
+	cout << "CDEBUG: human_readable_timeval(now_timeval): " << human_readable_timeval(now_timeval) << endl;
+	cout << "CDEBUG: human_readable_timeval_now_delta( start_timeval): " << human_readable_timeval_now_delta( start_timeval) << endl;
+	cout << "CDEBUG: human_readable_timeval_now_delta( start_plus10s_timeval): " << human_readable_timeval_now_delta(start_plus10s_timeval) << endl;
+	usleep(500*1000);
+	gettimeofday(&now_timeval,NULL);
+	cout << "CDEBUG: human_readable_timeval(now_timeval): " << human_readable_timeval(now_timeval) << endl;
+	cout << "CDEBUG: human_readable_timeval_now_delta( start_timeval): " << human_readable_timeval_now_delta( start_timeval) << endl;
+	cout << "CDEBUG: human_readable_timeval_now_delta( start_plus10s_timeval): " << human_readable_timeval_now_delta(start_plus10s_timeval) << endl;
+	exit(0);
+}
+*/
+
+
 int main()
 {
-	
+	// test_time();
 	try {
 		MultihostCassandra multicassandra("drizzle",10000,3);
 		multicassandra.add_cluster_node("appserver3.biuro.ant.vpn",port);

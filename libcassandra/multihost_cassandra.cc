@@ -19,13 +19,15 @@
 #include "libgenthrift/Cassandra.h"
 #include "libcassandra/multihost_cassandra.h"
 #include "libcassandra/cassandra_factory.h"
+#include "libcassandra/util/timetools.h"
 
 using namespace libcassandra;
 using namespace std;
 
 
-static void
-debug_check_get_columns(Cassandra & cassandra, const std::string & info_txt) {
+void static
+debug_check_get_columns(Cassandra & cassandra, const std::string & info_txt) 
+{
 	/*
 	std::vector<org::apache::cassandra::Column> result_columns;
 	ColumnSlicePredicate pred ("first","third");
@@ -38,67 +40,15 @@ debug_check_get_columns(Cassandra & cassandra, const std::string & info_txt) {
 }
 
 
-/*
-
-
-CassandraClient *CassandraFactory::createThriftClient(const string &in_host,
-                                                      int in_port,
-                                                      int in_conn_timeout,
-                                                      int in_recv_timeout,
-                                                      int in_send_timeout)
-{
-  boost::shared_ptr<TSocket> socket(new TSocket(in_host, in_port));
-
-  if (in_conn_timeout >= 0) {
-    socket->setConnTimeout(in_conn_timeout);
-  }
-  if (in_recv_timeout >= 0) {
-    socket->setRecvTimeout(in_recv_timeout);
-  }
-  if (in_send_timeout >= 0) {
-    socket->setSendTimeout(in_send_timeout);
-  }
-
-  boost::shared_ptr<TTransport> transport = boost::shared_ptr<TTransport>(new TFramedTransport(socket));
-  boost::shared_ptr<TProtocol> protocol(new TBinaryProtocol(transport));
-  transport->open(); // throws an exception 
-
-  CassandraClient *client= new(std::nothrow) CassandraClient(protocol);
-
-  return client;
-}
-tr1::shared_ptr<Cassandra> CassandraFactory::create(const string& keyspace)
-{
-  CassandraClient *thrift_client= createThriftClient(host, port, conn_timeout, recv_timeout, send_timeout);
-  tr1::shared_ptr<Cassandra> ret(new Cassandra(thrift_client, host, port, keyspace));
-  return ret;
-}
-
-
- */
 
 boost::shared_ptr<Cassandra> 
 libcassandra::connect_cassandra_client(const std::string & host, int port, const std::string& keyspace, int socket_timeout)
 {
-	clog << "CCALLED: connect_cassandra_client(host='" << host << "', port=" << port << " keyspace='" << keyspace << "' socket_timeout=" << socket_timeout << " )" << endl;
-	/*
-	boost::shared_ptr<apache::thrift::transport::TSocket> socket(new apache::thrift::transport::TSocket(host, port));
-	socket->setConnTimeout(socket_timeout);
-	socket->setRecvTimeout(socket_timeout);
-	socket->setSendTimeout(socket_timeout);
-	boost::shared_ptr<apache::thrift::transport::TTransport> transport(new apache::thrift::transport::TFramedTransport(socket));
-	boost::shared_ptr<apache::thrift::protocol::TProtocol> protocol(new apache::thrift::protocol::TBinaryProtocol(transport));
-	transport->open(); // throws an exception 	
-	org::apache::cassandra::CassandraClient * thrift_client = new(std::nothrow) org::apache::cassandra::CassandraClient(protocol);	
-	boost::shared_ptr<Cassandra> cassandra(new Cassandra(thrift_client, host, port, keyspace));	
-	*/
-	
-	CassandraFactory factory(host, port);
+	// clog << "CCALLED: connect_cassandra_client(host='" << host << "', port=" << port << " keyspace='" << keyspace << "' socket_timeout=" << socket_timeout << " )" << endl;
+	CassandraFactory factory(host, port, socket_timeout);
 	boost::shared_ptr<Cassandra> cassandra(factory.create(keyspace));
-	
-	string clus_name= cassandra->getClusterName();
-	clog << "CDEBUG: connect_cassandra_client(): cluster name: " << clus_name << endl;
-	
+	// string clus_name= cassandra->getClusterName();
+	// clog << "CDEBUG: connect_cassandra_client(): cluster name: " << clus_name << endl;
 	// debug_check_get_columns(*cassandra,"connect_cassandra_client(): Just after create.");
 	return cassandra;
 }
@@ -115,7 +65,7 @@ MultihostCassandra::MultihostCassandra(const std::string & n_keyspace, int n_soc
 	connection_retry_interval(n_connection_retry_interval)
 {
 	common_constructor();
-	clog << "CDEBUG: socket_timeout: " << socket_timeout << endl;
+	// clog << "CDEBUG: socket_timeout: " << socket_timeout << endl;
 }
 
 
@@ -178,14 +128,14 @@ libcassandra::MultihostCassandra::getColumns(std::vector<org::apache::cassandra:
 	while (1) {
 		boost::shared_ptr<Cassandra> picked_cassandra(pick_cassandra()); /// That may throw errors in case of serious failure
 		try {
-			clog << "CDEBUG: Calling getColumns(key=" << key << ",column_family=" << column_family << " column_slice_predicate=" << column_slice_predicate << " on " << picked_cassandra->getNode() ;
+			// clog << "CDEBUG: Calling getColumns(key=" << key << ",column_family=" << column_family << " column_slice_predicate=" << column_slice_predicate << " on " << picked_cassandra->getNode() ;
 			picked_cassandra->getColumns(result_columns,key,column_family,column_slice_predicate,consistency_level);
 			return;
 		} catch (org::apache::cassandra::NotFoundException & nfe) { // Exceptions which we propagate
-			clog << "CDEBUG: getColumns(key=" << key << ",column_family=" << column_family << ") failed NotFoundException: " << nfe.what() << " - propagating." << endl;
+			// clog << "CDEBUG: getColumns(key=" << key << ",column_family=" << column_family << ") failed NotFoundException: " << nfe.what() << " - propagating." << endl;
 			throw;
 		} catch (org::apache::cassandra::InvalidRequestException & ire) { // Exceptions which we propagate
-			clog << "CDEBUG: getColumns(key=" << key << ",column_family=" << column_family << ") failed InvalidRequestException: " << ire.what() << " - propagating." << endl;
+			// clog << "CDEBUG: getColumns(key=" << key << ",column_family=" << column_family << ") failed InvalidRequestException: " << ire.what() << " - propagating." << endl;
 			throw;
 		} catch (exception & e) {
 			cerr << "CERROR: getColumns(key=" << key << ",column_family=" << column_family << ") failed: " << e.what() << endl;
@@ -236,8 +186,12 @@ libcassandra::MultihostCassandra::pick_cassandra()
 			return picked_cassandra;
 		} else if ( state_it->state == CassandraStateRow::init) {
 			/// Checking interval since last socket error
-			clock_t current_clock = clock();
-			if ( current_clock-state_it->socket_error_clock >= CLOCKS_PER_SEC * connection_retry_interval ) {
+			// clock_t current_clock = clock();
+			timeval current_timeval;
+			gettimeofday(&current_timeval,NULL);
+			 
+			// if ( current_clock-state_it->socket_error_clock >= CLOCKS_PER_SEC * connection_retry_interval ) {
+			if (timeval_seconds_delta(state_it->socket_error_timeval, current_timeval) > connection_retry_interval) {
 				clog << "CDEBUG: Retrying to reconnect with: " << *state_it << endl;
 				try {
 					// boost::shared_ptr<Cassandra>  cassandra 
@@ -278,8 +232,11 @@ libcassandra::MultihostCassandra::mark_picked_cassandra_error(const Cassandra & 
 
 std::ostream & libcassandra::operator<< (std::ostream & os, const MultihostCassandra::CassandraStateRow & state_row)
 {
+	os.setf(ios::fixed, ios::floatfield); // TODO: Restore old values ?
+	os.precision(3);
+ 
 	os << " state: " << state_row.state ; 
-	os << " socket_error_clock: " << state_row.socket_error_clock;
+	os << " socket_error_clock: " << human_readable_timeval(state_row.socket_error_timeval) << " delta: " << human_readable_timeval_now_delta(state_row.socket_error_timeval) << "[s]";
 	os << " (" << state_row.cassandra.get() << "/" << state_row.cassandra.use_count() << ") ";
 	os << state_row.host << ":" << state_row.port;
 	return os;

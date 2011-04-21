@@ -100,14 +100,15 @@ public:
 				host = a_host;
 				port = a_port;
 				state = init;
-				socket_error_clock = 0; // TODO: Make sure it's standard to be integer-like ?
+				// socket_error_clock = 0; // TODO: Make sure it's standard to be integer-like ?
 			}
 			boost::shared_ptr<Cassandra> cassandra;
 			 
 			std::string host;
 			int port;
 			enum state_t {init, operational} state; 
-			clock_t socket_error_clock; /// http://www.cplusplus.com/reference/clibrary/ctime/clock/
+			// clock_t socket_error_clock; /// http://www.cplusplus.com/reference/clibrary/ctime/clock/
+			struct timeval socket_error_timeval;
 			
 			/**
 			* Switches to fully operational state, cassandra is ready to answer queries
@@ -123,8 +124,9 @@ public:
 			void  switch_to_socket_error_state() {
 				cassandra.reset();
 				state = init;
-				socket_error_clock = clock(); /// TODO: Switch to http://stackoverflow.com/questions/588307/c-obtaining-milliseconds-time-on-linux-clock-doesnt-seem-to-work-properly
+				// socket_error_clock = clock(); /// TODO: Switch to http://stackoverflow.com/questions/588307/c-obtaining-milliseconds-time-on-linux-clock-doesnt-seem-to-work-properly
 							      /// http://linux.die.net/man/2/gettimeofday
+				gettimeofday(&socket_error_timeval,NULL);
 			}
 	};
 private:
@@ -149,9 +151,6 @@ public:
 
 std::ostream & operator<< (std::ostream & os, const MultihostCassandra::CassandraStateRow & state_row);
 
+
 } // namespace libcassandra
-
-
-
-
 #endif // __LIBCASSANDRA_MULTIHOST_CASSANDRA_H
