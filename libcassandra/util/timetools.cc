@@ -48,14 +48,13 @@ human_readable_timeval( const struct timeval & tv, const char * format )
 
 // std::string static
 float
-human_readable_timeval_now_delta( const struct timeval & tv)
+timeval_now_seconds_delta( const struct timeval & tv)
 {
 	
 	struct timeval now_timeval, delta_timeval;
 	//void timersub(struct timeval *a, struct timeval *b,
         //      struct timeval *res);
 	gettimeofday(&now_timeval,NULL);
-	
         timersub(&tv,&now_timeval,&delta_timeval);
 	//char buf[64];
 	//snprintf(buf, sizeof buf, "%d.%06d", (int)delta_timeval.tv_sec, (int)delta_timeval.tv_usec);
