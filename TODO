@@ -22,12 +22,6 @@ Switch use to boost::shared_ptr instead (not std::tr1::shared_ptr as Thrift gene
 where there is no other option.
 
 --------------------------------------------------
-TODO: Consider switching args order to:
- (CF, row_key, ... ) ?
-PRO: More logical to final user ?
-CON: Thrift natural is row_key first.
-
---------------------------------------------------
 TODO: Implement default quorum for reads and writes used when no quorum level is passed.
 
 --------------------------------------------------
@@ -49,6 +43,9 @@ https://github.com/axs-mvd/libcassandra
 TODO: Review and merge ttl from 
 https://github.com/maxcom/libcassandra
 
+--------------------------------------------------
+TODO: Use boost-log as logging facilyty
+http://boost-log.sourceforge.net/libs/log/doc/html/index.html
 
 --------------------------------------------------
 TODO: Check and validate split Makefile.ams to standard DIRS layout
@@ -63,3 +60,9 @@ Transparently dealing with nodes downs/ups (if possible).
 Allowing async queries ?
 Connection pool.
 Connection pool with priority on localhost ?
+
+--------------------------------------------------
+TODO: Consider switching args order to:
+ (CF, row_key, ... ) ?
+PRO: More logical to final user ?
+CON: Thrift natural is row_key first.
