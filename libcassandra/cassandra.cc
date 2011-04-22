@@ -293,7 +293,7 @@ Column Cassandra::getColumn(const string& key,
                             const string& column_family,
                             const string& super_column_name,
                             const string& column_name,
-                            ConsistencyLevel::type level)
+                            ConsistencyLevel::type read_consistency_level)
 {
   ColumnPath col_path;
   col_path.column_family.assign(column_family);
@@ -306,7 +306,7 @@ Column Cassandra::getColumn(const string& key,
   col_path.__isset.column= true;
   ColumnOrSuperColumn cosc;
   /* TODO - validate column path */
-  thrift_client->get(cosc, key, col_path, level);
+  thrift_client->get(cosc, key, col_path, read_consistency_level);
   if (cosc.column.name.empty())
   {
     /* throw an exception */
@@ -315,7 +315,7 @@ Column Cassandra::getColumn(const string& key,
   return cosc.column;
 }
 
-
+/* // inlined
 Column Cassandra::getColumn(const string& key,
                             const string& column_family,
                             const string& super_column_name,
@@ -323,13 +323,16 @@ Column Cassandra::getColumn(const string& key,
 {
   return getColumn(key, column_family, super_column_name, column_name, ConsistencyLevel::QUORUM);
 }
+*/
 
 Column Cassandra::getColumn(const string& key,
                             const string& column_family,
-                            const string& column_name)
+                            const string& column_name,
+                            ConsistencyLevel::type read_consistency_level)
 {
-  return getColumn(key, column_family, "", column_name, ConsistencyLevel::QUORUM);
+  return getColumn(key, column_family, "", column_name, read_consistency_level);
 }
+
 
 
 string Cassandra::getColumnValue(const string& key,
@@ -343,9 +346,10 @@ string Cassandra::getColumnValue(const string& key,
 
 string Cassandra::getColumnValue(const string& key,
                                  const string& column_family,
-                                 const string& column_name)
+                                 const string& column_name,
+                                 org::apache::cassandra::ConsistencyLevel::type read_consistency_level)
 {
-	return getColumn(key, column_family, column_name).value;
+	return getColumn(key, column_family, column_name, read_consistency_level).value;
 }
 
 
