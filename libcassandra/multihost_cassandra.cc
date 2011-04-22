@@ -73,6 +73,7 @@ void
 libcassandra::MultihostCassandra::common_constructor() {
 	default_read_consistency_level =  org::apache::cassandra::ConsistencyLevel::QUORUM;
 	default_write_consistency_level =  org::apache::cassandra::ConsistencyLevel::QUORUM;
+	max_connecting_to_any_interval = 120;
 }
 
 
@@ -147,7 +148,8 @@ libcassandra::MultihostCassandra::getColumns(std::vector<org::apache::cassandra:
 std::string 
 libcassandra::MultihostCassandra::getColumnValue(const std::string& key,
                              const std::string& column_family,
-                             const std::string& column_name)
+                             const std::string& column_name,
+			     org::apache::cassandra::ConsistencyLevel::type consistency_level)
 {
 	if (cassandra_states.empty() ) {
 		throw logic_error("No cassandra nodes defined");
@@ -155,7 +157,7 @@ libcassandra::MultihostCassandra::getColumnValue(const std::string& key,
 	while (1) {
 		boost::shared_ptr<Cassandra> picked_cassandra(pick_cassandra()); /// That may throw errors in case of serious failure
 		try {
-			return picked_cassandra->getColumnValue(key,column_family,column_name);
+			return picked_cassandra->getColumnValue(key,column_family,column_name,consistency_level);
 		} catch (org::apache::cassandra::NotFoundException & nfe) { // Exceptions which we propagate
 			throw;
 		} catch (org::apache::cassandra::InvalidRequestException & ire) { // Exceptions which we propagate
@@ -172,9 +174,10 @@ boost::shared_ptr<Cassandra>
 libcassandra::MultihostCassandra::pick_cassandra()
 {
 	/// Simplest version
-	/// Failed connection goes at end of queue
 	/// Same cassandra (first from  sequence ) is used all the time if connection is OK
-	/// Connection is initilised when needed
+	/// If node from beginning is not available , next ones are tried
+	/// Connection to failed nodes is tried not sooner than connection_retry_interval paremeter
+	/// 
 	/// Most of tasks here could have been done in background thread (assuming proper locking of cassandra_states)
 	
 	
@@ -186,12 +189,10 @@ libcassandra::MultihostCassandra::pick_cassandra()
 			return picked_cassandra;
 		} else if ( state_it->state == CassandraStateRow::init) {
 			/// Checking interval since last socket error
-			// clock_t current_clock = clock();
+			
 			timeval current_timeval;
 			gettimeofday(&current_timeval,NULL);
-			 
-			// if ( current_clock-state_it->socket_error_clock >= CLOCKS_PER_SEC * connection_retry_interval ) {
-			if (timeval_seconds_delta(state_it->socket_error_timeval, current_timeval) > connection_retry_interval) {
+			if (timeval_seconds_delta(current_timeval, state_it->socket_error_timeval) > connection_retry_interval) {
 				clog << "CDEBUG: Retrying to reconnect with: " << *state_it << endl;
 				try {
 					// boost::shared_ptr<Cassandra>  cassandra 
@@ -204,14 +205,48 @@ libcassandra::MultihostCassandra::pick_cassandra()
 					state_it->switch_to_socket_error_state(); // Marking to reset last error time
 				}
 			}
-			
 		}
-		
 	}
-	// TODO: What now ? No connection operational all connections recently in error
-	//       Try every connection one by one until some timeout reached ?
-	throw runtime_error("No connection operational all connections recently in error");
-	// return picked_cassandra
+	// Trying to connect to any of nodes
+	
+	struct timeval connecting_to_any_start_timeval;
+	gettimeofday(&connecting_to_any_start_timeval,NULL);
+	float connecting_to_any_time = 0.0;
+	while (1) {
+		struct timeval connecting_to_any_loop_start_timeval;
+		gettimeofday(&connecting_to_any_loop_start_timeval,NULL);
+		
+		
+		for (std::deque<CassandraStateRow>::iterator state_it = cassandra_states.begin(); state_it != cassandra_states.end(); ++state_it) {
+			if (state_it->state == CassandraStateRow::operational) {
+				picked_cassandra = state_it->cassandra;
+				return picked_cassandra;
+			} else if ( state_it->state == CassandraStateRow::init) {
+				clog << "CDEBUG: Retrying to reconnect with: " << *state_it << endl;
+				try {
+					// boost::shared_ptr<Cassandra>  cassandra 
+					picked_cassandra = connect_cassandra_client(state_it->host, state_it->port, keyspace, socket_timeout);
+					state_it->switch_to_operational_state(picked_cassandra);
+					return picked_cassandra;
+				} catch (exception & e) {
+					clog << "CDEBUG: Reconnect failed: " << e.what() << endl;
+					state_it->switch_to_socket_error_state(); // Marking to reset last error time
+				}
+			}
+		}
+
+		float loop_extra_time = timeval_now_seconds_delta(connecting_to_any_loop_start_timeval) + connection_retry_interval;
+		clog << "CDEBUG: loop_extra_time: " << loop_extra_time;
+		clog << " (connection_retry_interval: " << connection_retry_interval << " connecting_to_any_time: " << connecting_to_any_time << "[s] )." << endl;
+		
+		if (loop_extra_time > 0) {
+			usleep( loop_extra_time * 1000000);
+		}
+		connecting_to_any_time = -timeval_now_seconds_delta(connecting_to_any_start_timeval);
+		if ( connecting_to_any_time > max_connecting_to_any_interval) {
+			throw runtime_error("No connection operational all connections recently in error, connecting_to_any_time limit exceeded.");
+		}
+	}
 }
 
 void 
@@ -236,7 +271,7 @@ std::ostream & libcassandra::operator<< (std::ostream & os, const MultihostCassa
 	os.precision(3);
  
 	os << " state: " << state_row.state ; 
-	os << " socket_error_clock: " << human_readable_timeval(state_row.socket_error_timeval) << " delta: " << human_readable_timeval_now_delta(state_row.socket_error_timeval) << "[s]";
+	os << " socket_error_clock: " << human_readable_timeval(state_row.socket_error_timeval) << " delta: " << timeval_now_seconds_delta(state_row.socket_error_timeval) << "[s]";
 	os << " (" << state_row.cassandra.get() << "/" << state_row.cassandra.use_count() << ") ";
 	os << state_row.host << ":" << state_row.port;
 	return os;

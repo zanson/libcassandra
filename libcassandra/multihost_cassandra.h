@@ -41,7 +41,7 @@ connect_cassandra_client(const std::string & host, int port, const std::string& 
 class MultihostCassandra
 {
 public:
-	MultihostCassandra(const std::string & n_keyspace, int n_socket_timeout = 10000, int n_connection_retry_interval=30);
+	MultihostCassandra(const std::string & n_keyspace, int n_socket_timeout = 10000, int n_connection_retry_interval=3);
 private:
 	void common_constructor();
 public:
@@ -54,6 +54,30 @@ public:
 	int add_cluster_node(const std::string & host, int port);
 		
 	void debug_print_state(const std::string & state_name);
+
+	/**
+	 * Sets time how long will be reconnecting to any of node retried in case if all nodes are down
+	 * @param[in] n_max_connecting_to_any_interval Number of seconds to try
+	 */
+	void inline setMaxConnectingToAnyInterval(int n_max_connecting_to_any_interval) {
+		if (max_connecting_to_any_interval < 0) {
+			return;
+		}
+		max_connecting_to_any_interval = n_max_connecting_to_any_interval; // seconds;
+	}
+	
+	/**
+	 * Sets time how long will be reconnecting to any of node retried in case if all nodes are down
+	 * @param[in] n_connection_retry_interval Number of seconds to try
+	 */
+	void inline setConnectingRetryInterval(int n_connection_retry_interval) {
+		if (n_connection_retry_interval < 0) {
+			connection_retry_interval = 0;
+			return;
+		}
+		connection_retry_interval = n_connection_retry_interval; // seconds;
+	}
+	
 	
 	/// Below methods following standard cassandra interface 
 	
@@ -85,12 +109,19 @@ public:
 	* @param[in] key the column key
 	* @param[in] column_family the column family
 	* @param[in] column_name the column name (optional)
+	* @param[in] consistency_level Read consistency level (optional), default will be used if not specified
 	* @return the value for the column that corresponds to the given parameters
 	*/
 	std::string getColumnValue(const std::string& key,
                              const std::string& column_family,
-                             const std::string& column_name);
+                             const std::string& column_name,
+                             org::apache::cassandra::ConsistencyLevel::type consistency_level);
 	
+	std::string inline getColumnValue(const std::string& key,
+                             const std::string& column_family,
+                             const std::string& column_name) {
+		return getColumnValue(key,column_family, column_name, default_read_consistency_level);
+	}
 	
 	
 	class CassandraStateRow {
@@ -99,7 +130,7 @@ public:
 				// cassandra 
 				host = a_host;
 				port = a_port;
-				state = init;
+				state = init;				
 				// socket_error_clock = 0; // TODO: Make sure it's standard to be integer-like ?
 			}
 			boost::shared_ptr<Cassandra> cassandra;
@@ -133,6 +164,7 @@ private:
 	const std::string keyspace;
 	int socket_timeout; // milisecons
 	int connection_retry_interval; // seconds
+	int max_connecting_to_any_interval; // seconds;
 	org::apache::cassandra::ConsistencyLevel::type default_read_consistency_level; // TODO: Make accessors
 	org::apache::cassandra::ConsistencyLevel::type default_write_consistency_level; // TODO: Make accessors
 	

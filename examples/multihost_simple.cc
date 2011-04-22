@@ -58,13 +58,45 @@ void static test_time() {
 */
 
 
+
+static void 
+read_in_loop_test(MultihostCassandra & multicassandra)
+{
+	multicassandra.setConnectingRetryInterval(5);
+	multicassandra.setMaxConnectingToAnyInterval(30);
+	while(1) {
+		struct timeval  loop_start_timeval;
+		gettimeofday(&loop_start_timeval,NULL);
+		string res = multicassandra.getColumnValue("sarah", "Data", "first");
+		// cout << "Value in column retrieved as 1st is: " << res << endl;
+		
+		std::vector<org::apache::cassandra::Column> result_columns;
+		ColumnSlicePredicate pred("first","third");
+		
+		// cout << "Quering using " << pred << endl;
+		multicassandra.getColumns(result_columns, "sarah","Data",pred);
+		// cout << "Got " << result_columns.size() << " columns as range query result." << endl;
+		
+		// for ( std::vector<org::apache::cassandra::Column>::iterator itr = result_columns.begin(); itr != result_columns.end(); itr++ ) {
+		// 	cout << "Got column: '" << itr->name << "' : '" << itr->value << "' timestamp: " << itr->timestamp << " ttl: " << itr->ttl << endl;
+		// }
+		cout << "Loop finished in " << -timeval_now_seconds_delta(loop_start_timeval) << "[s]." << endl;
+		sleep(3);
+	}
+}
+
+
 int main()
 {
 	// test_time();
+	// read_in_loop_test()
 	try {
 		MultihostCassandra multicassandra("drizzle",10000,3);
-		multicassandra.add_cluster_node("appserver3.biuro.ant.vpn",port);
+		multicassandra.add_cluster_node("appserver4.biuro.ant.vpn",port);
 		multicassandra.add_cluster_node("appserver2.biuro.ant.vpn",port);
+		multicassandra.add_cluster_node("db3.biuro.ant.vpn",port);
+		
+		read_in_loop_test(multicassandra);
 		
 		string res = multicassandra.getColumnValue("sarah", "Data", "first");
 		cout << "Value in column retrieved as 1st is: " << res << endl;
