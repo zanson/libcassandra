@@ -338,9 +338,11 @@ Column Cassandra::getColumn(const string& key,
 string Cassandra::getColumnValue(const string& key,
                                  const string& column_family,
                                  const string& super_column_name,
-                                 const string& column_name)
+                                 const string& column_name,
+                                 org::apache::cassandra::ConsistencyLevel::type read_consistency_level
+				)
 {
-  return getColumn(key, column_family, super_column_name, column_name).value;
+  return getColumn(key, column_family, super_column_name, column_name,read_consistency_level).value;
 }
 
 
@@ -355,17 +357,18 @@ string Cassandra::getColumnValue(const string& key,
 
 int64_t Cassandra::getIntegerColumnValue(const string& key,
                                          const string& column_family,
-                                         const string& column_name)
+                                         const string& column_name,
+                                         org::apache::cassandra::ConsistencyLevel::type read_consistency_level)
 {
-	string ret= getColumn(key, column_family, column_name).value;
-  return deserializeLong(ret);
+	string ret= getColumn(key, column_family, column_name,read_consistency_level).value;
+	return deserializeLong(ret);
 }
 
 
 SuperColumn Cassandra::getSuperColumn(const string& key,
                                       const string& column_family,
                                       const string& super_column_name,
-                                      ConsistencyLevel::type level)
+                                      ConsistencyLevel::type read_consistency_level)
 {
   ColumnPath col_path;
   col_path.column_family.assign(column_family);
@@ -374,7 +377,7 @@ SuperColumn Cassandra::getSuperColumn(const string& key,
   col_path.__isset.super_column= true;
   ColumnOrSuperColumn cosc;
   /* TODO - validate super column path */
-  thrift_client->get(cosc, key, col_path, level);
+  thrift_client->get(cosc, key, col_path, read_consistency_level);
   if (cosc.super_column.name.empty())
   {
     /* throw an exception */
@@ -383,20 +386,21 @@ SuperColumn Cassandra::getSuperColumn(const string& key,
   return cosc.super_column;
 }
 
-
+/* // inlined
 SuperColumn Cassandra::getSuperColumn(const string& key,
                                       const string& column_family,
                                       const string& super_column_name)
 {
   return getSuperColumn(key, column_family, super_column_name, ConsistencyLevel::QUORUM);
 }
+*/
 
 vector<Column> Cassandra::getColumns(
     const string &key,
     const string &column_family,
     const string &super_column_name,
-    const vector<string> column_names,
-    org::apache::cassandra::ConsistencyLevel::type level
+    const vector<string> & column_names,
+    org::apache::cassandra::ConsistencyLevel::type read_consistency_level
     )
 {
 
@@ -415,7 +419,7 @@ vector<Column> Cassandra::getColumns(
   pred.column_names = column_names;
   pred.__isset.column_names= true;
 
-  thrift_client->get_slice(ret_cosc, key, col_parent, pred, level);
+  thrift_client->get_slice(ret_cosc, key, col_parent, pred, read_consistency_level);
   for (vector<ColumnOrSuperColumn>::iterator it= ret_cosc.begin();
       it != ret_cosc.end();
       ++it)
@@ -428,6 +432,7 @@ vector<Column> Cassandra::getColumns(
   return result;
 }
 
+/* // inlined
 vector<Column> Cassandra::getColumns(
     const string &key,
     const string &column_family,
@@ -437,17 +442,18 @@ vector<Column> Cassandra::getColumns(
 {
 	return getColumns(key, column_family, super_column_name, column_names, ConsistencyLevel::QUORUM);
 }
+*/
 
 vector<Column> Cassandra::getColumns(
     const string &key,
     const string &column_family,
-    const vector<string> column_names,
-    org::apache::cassandra::ConsistencyLevel::type level
+    const vector<string> & column_names,
+    org::apache::cassandra::ConsistencyLevel::type read_consistency_level
     )
 {
-  return getColumns(key, column_family, "", column_names, level);
+  return getColumns(key, column_family, "", column_names, read_consistency_level);
 }
-
+/* // inlined
 vector<Column> Cassandra::getColumns(
     const string &key,
     const string &column_family,
@@ -456,12 +462,13 @@ vector<Column> Cassandra::getColumns(
 {
   return getColumns(key, column_family, "", column_names, ConsistencyLevel::QUORUM);
 }
+*/
 
 vector<Column> Cassandra::getColumns(const string &key,
                            const std::string &column_family,
                            const std::string &super_column_name,
                            const org::apache::cassandra::SliceRange &range,
-			   org::apache::cassandra::ConsistencyLevel::type level
+			   org::apache::cassandra::ConsistencyLevel::type read_consistency_level
 			   )
 {
 
@@ -480,7 +487,7 @@ vector<Column> Cassandra::getColumns(const string &key,
   pred.slice_range = range;
   pred.__isset.slice_range= true;
 
-  thrift_client->get_slice(ret_cosc, key, col_parent, pred, level);
+  thrift_client->get_slice(ret_cosc, key, col_parent, pred, read_consistency_level);
   for (vector<ColumnOrSuperColumn>::iterator it= ret_cosc.begin();
       it != ret_cosc.end();
       ++it)
@@ -493,6 +500,7 @@ vector<Column> Cassandra::getColumns(const string &key,
   return result;
 }
 
+/*  // inlined
 vector<Column> Cassandra::getColumns(const string &key,
                            const std::string &column_family,
                            const std::string &super_column_name,
@@ -501,6 +509,7 @@ vector<Column> Cassandra::getColumns(const string &key,
 {
 	return getColumns(key, column_family, super_column_name, range, ConsistencyLevel::QUORUM);
 }
+*/
 
 vector<Column> Cassandra::getColumns(const string &key,
                            const std::string &column_family,
