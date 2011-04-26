@@ -75,9 +75,6 @@ std::ostream& operator<< (std::ostream& os, const ColumnSlicePredicate & col_sli
 
 class Cassandra
 {
-	// TODO: Add org::apache::cassandra::ConsistencyLevel::type read_consistency_level to all read methods
-	// TODO: Add org::apache::cassandra::ConsistencyLevel::type write_consistency_level to all insert/delete methods
-	// TODO: Replace hardwired ConsistencyLevel::QUORUM by default_*_consistency_level memebers
 public:
 
   Cassandra();
@@ -137,16 +134,16 @@ public:
    * @param[in] super_column_name the super column name (optional)
    * @param[in] column_name the column name
    * @param[in] value the column value
-   * @param[in] level consistency level
-   * @param[in] ttl time to live
+   * @param[in] write_consistency_level consistency level (optional)
+   * @param[in] ttl time to live (optional)
    */
   void insertColumn(const std::string& key,
                     const std::string& column_family,
                     const std::string& super_column_name,
                     const std::string& column_name,
                     const std::string& value,
-                    org::apache::cassandra::ConsistencyLevel::type level,
-                    int32_t ttl);
+                    org::apache::cassandra::ConsistencyLevel::type write_consistency_level,
+                    int32_t ttl = 0);
 
   /**
    * Insert a column, possibly inside a supercolumn
@@ -157,11 +154,13 @@ public:
    * @param[in] column_name the column name
    * @param[in] value the column value
    */
-  void insertColumn(const std::string& key,
-                    const std::string& column_family,
-                    const std::string& super_column_name,
-                    const std::string& column_name,
-                    const std::string& value);
+  void inline insertColumn(const std::string& key,
+                           const std::string& column_family,
+                           const std::string& super_column_name,
+                           const std::string& column_name,
+                           const std::string& value) {
+	  return insertColumn(key, column_family, super_column_name, column_name, value, default_write_consistency_level);
+  }
 
   /**
    * Insert a column, directly in a columnfamily
@@ -170,11 +169,26 @@ public:
    * @param[in] column_family the column family
    * @param[in] column_name the column name
    * @param[in] value the column value
+   * @param[in] write_consistency_level consistency level (optional)
+   * @param[in] ttl time to live (optional)
    */
-  void insertColumn(const std::string& key,
+  void inline insertColumn(const std::string& key,
                     const std::string& column_family,
                     const std::string& column_name,
-                    const std::string& value);
+                    const std::string& value,
+                    org::apache::cassandra::ConsistencyLevel::type write_consistency_level,
+                    int32_t ttl = 0) {
+	  insertColumn(key, column_family, "", column_name, value, write_consistency_level, ttl);
+  }
+  
+  void inline insertColumn(const std::string& key,
+                    const std::string& column_family,
+                    const std::string& column_name,
+                    const std::string& value,
+		    int32_t ttl = 0) {
+	  insertColumn(key, column_family, "", column_name, value, default_write_consistency_level,ttl);
+  }
+  
 
   /**
    * Insert a column, directly in a columnfamily
@@ -183,31 +197,47 @@ public:
    * @param[in] column_family the column family
    * @param[in] column_name the column name
    * @param[in] value the column value
+   * @param[in] write_consistency_level consistency level (optional)
+   * @param[in] ttl time to live (optional)
    */
   void insertColumn(const std::string& key,
                     const std::string& column_family,
                     const std::string& column_name,
-                    const int64_t value);
+                    const int64_t value,
+                    org::apache::cassandra::ConsistencyLevel::type write_consistency_level,
+                    int32_t ttl = 0);
+  
+  void inline insertColumn(const std::string& key,
+                           const std::string& column_family,
+                           const std::string& column_name,
+                           const int64_t value) {
+	  insertColumn(key,column_family, column_name,value, default_write_consistency_level);
+  }
+  
+  
 
   /**
    * Removes all the columns that match the given column path
    *
    * @param[in] key the column or super column key
    * @param[in] col_path the path to the column or super column
-   * @param[in] level consistency level
+   * @param[in] write_consistency_level consistency level (optional)
    */
   void remove(const std::string& key,
               const org::apache::cassandra::ColumnPath& col_path,
-              org::apache::cassandra::ConsistencyLevel::type level);
-
+              org::apache::cassandra::ConsistencyLevel::type write_consistency_level);
+  
   /**
    * Removes all the columns that match the given column path
    *
    * @param[in] key the column or super column key
    * @param[in] col_path the path to the column or super column
-   */
-  void remove(const std::string& key,
-              const org::apache::cassandra::ColumnPath& col_path);
+   */  
+  void inline remove(const std::string& key,
+              const org::apache::cassandra::ColumnPath& col_path) {
+	  remove(key,col_path, default_write_consistency_level);
+  }
+
 
   /**
    * Removes all the columns that match the given arguments
@@ -231,10 +261,12 @@ public:
    * @param[in] super_column_name the super column name (optional)
    * @param[in] column_name the column name (optional)
    */
-  void removeColumn(const std::string& key,
-                    const std::string& column_family,
-                    const std::string& super_column_name,
-                    const std::string& column_name);
+  void inline removeColumn(const std::string& key,
+                           const std::string& column_family,
+                           const std::string& super_column_name,
+                           const std::string& column_name) {
+	remove(key, column_family, super_column_name, column_name);
+  }
 
 
   /**
@@ -244,9 +276,11 @@ public:
    * @param[in] column_family the column family
    * @param[in] super_column_name the super column name
    */
-  void removeSuperColumn(const std::string& key,
-                         const std::string& column_family,
-                         const std::string& super_column_name);
+  void inline removeSuperColumn(const std::string& key,
+                                const std::string& column_family,
+                                const std::string& super_column_name) {
+	remove(key, column_family, super_column_name, "");
+  }
 
   /**
    * Rertieve a column from supercolumn
@@ -441,7 +475,7 @@ public:
 		  const std::string & key,
 		  const std::string & column_family,
 		  const ColumnSlicePredicate & column_slice_predicate,
-		  org::apache::cassandra::ConsistencyLevel::type consistency_level);
+		  org::apache::cassandra::ConsistencyLevel::type read_consistency_level);
   
   void inline getColumns(std::vector<org::apache::cassandra::Column> & result_columns,
 			  const std::string & key,
@@ -477,17 +511,20 @@ public:
    * @param[in] key the column key
    * @param[in] column_family the column family
    * @param[in] range the range for the query
-   * @param[in] level Consistency level (optional)
+   * @param[in] read_consistency_level Read consistency level (optional), default will be used if not specified
    * @return A list of found columns
    */
   std::vector<org::apache::cassandra::Column> getColumns(const std::string &key,
                                                          const std::string &column_family,
                                                          const org::apache::cassandra::SliceRange &range,
-                                                         org::apache::cassandra::ConsistencyLevel::type level);
-  std::vector<org::apache::cassandra::Column> getColumns(const std::string &key,
-                                                         const std::string &column_family,
-                                                         const org::apache::cassandra::SliceRange &range);
-
+                                                         org::apache::cassandra::ConsistencyLevel::type read_consistency_level);
+  
+  std::vector<org::apache::cassandra::Column> inline getColumns(const std::string &key,
+                                                                const std::string &column_family,
+                                                                const org::apache::cassandra::SliceRange &range) {
+	  return getColumns(key,column_family,range,default_read_consistency_level);
+  }
+  
 
   /**
    * Retrieve multiple super columns by names
@@ -495,52 +532,83 @@ public:
    * @param[in] key the column key
    * @param[in] column_family the column family
    * @param[in] super_column_names the list of super column names
-   * @param[in] level Consistency level (optional)
+   * @param[in] read_consistency_level Read consistency level (optional), default will be used if not specified
    * @return A list of found super columns
    */
   std::vector<org::apache::cassandra::SuperColumn> getSuperColumns(
                                                                    const std::string &key,
                                                                    const std::string &column_family,
-                                                                   const std::vector<std::string> super_column_names,
-                                                                   org::apache::cassandra::ConsistencyLevel::type level);
-  std::vector<org::apache::cassandra::SuperColumn> getSuperColumns(
-                                                                   const std::string &key,
-                                                                   const std::string &column_family,
-                                                                   const std::vector<std::string> super_column_names);
+                                                                   const std::vector<std::string> & super_column_names,
+                                                                   org::apache::cassandra::ConsistencyLevel::type read_consistency_level);
+  std::vector<org::apache::cassandra::SuperColumn> inline getSuperColumns(
+                                                                          const std::string &key,
+                                                                          const std::string &column_family,
+                                                                          const std::vector<std::string> & super_column_names) {
+	  return getSuperColumns(key,column_family,super_column_names,default_read_consistency_level);
+  }
   /**
    * Retrieve multiple super columns by range
    *
    * @param[in] key the column key
    * @param[in] column_family the column family
    * @param[in] range the range for the query
-   * @param[in] level Consistency level (optional)
+   * @param[in] read_consistency_level Read consistency level (optional), default will be used if not specified
    * @return A list of found super columns
    */
   std::vector<org::apache::cassandra::SuperColumn> getSuperColumns(
                                                                    const std::string &key,
                                                                    const std::string &column_family,
                                                                    const org::apache::cassandra::SliceRange &range,
-                                                                   org::apache::cassandra::ConsistencyLevel::type level);
-  std::vector<org::apache::cassandra::SuperColumn> getSuperColumns(
-                                                                   const std::string &key,
-                                                                   const std::string &column_family,
-                                                                   const org::apache::cassandra::SliceRange &range);
+                                                                   org::apache::cassandra::ConsistencyLevel::type read_consistency_level);
+  std::vector<org::apache::cassandra::SuperColumn> inline getSuperColumns(
+                                                                          const std::string &key,
+                                                                          const std::string &column_family,
+                                                                          const org::apache::cassandra::SliceRange &range) {
+	  return getSuperColumns(key,column_family,range,default_read_consistency_level);
+  }
+  // TODO: Add return as reference param versions of above to avoid copying on return
 
 
+  /**
+   * Retrieve rows range slice from column
+   *
+   * @param[in] col_parent
+   * @param[in] pred 
+   * @param[in] start Range start
+   * @param[in] finish Range finish
+   * @param[in] row_count Maximum number of rows
+   * @param[in] read_consistency_level Read consistency level (optional), default will be used if not specified
+   * @return Matching rows mapped by row_keys
+   */
   std::map<std::string, std::vector<org::apache::cassandra::Column> >
   getRangeSlice(const org::apache::cassandra::ColumnParent& col_parent,
                 const org::apache::cassandra::SlicePredicate& pred,
                 const std::string& start,
                 const std::string& finish,
                 const int32_t row_count,
-                org::apache::cassandra::ConsistencyLevel::type level);
+                org::apache::cassandra::ConsistencyLevel::type read_consistency_level);
 
   std::map<std::string, std::vector<org::apache::cassandra::Column> >
-  getRangeSlice(const org::apache::cassandra::ColumnParent& col_parent,
-                const org::apache::cassandra::SlicePredicate& pred,
-                const std::string& start,
-                const std::string& finish,
-                const int32_t row_count);
+  inline getRangeSlice(const org::apache::cassandra::ColumnParent& col_parent,
+                       const org::apache::cassandra::SlicePredicate& pred,
+                       const std::string& start,
+                       const std::string& finish,
+                       const int32_t row_count) {
+	  return getRangeSlice(col_parent, pred, start, finish, row_count, default_read_consistency_level);
+  }
+  // TODO: Add return as reference param versions of above to avoid copying on return
+  
+  /**
+   * Retrieve rows range slice from supercolumn
+   *
+   * @param[in] col_parent
+   * @param[in] pred 
+   * @param[in] start Range start
+   * @param[in] finish Range finish
+   * @param[in] row_count Maximum number of rows
+   * @param[in] read_consistency_level Read consistency level (optional), default will be used if not specified
+   * @return Matching rows mapped by row_keys
+   */
 
   std::map<std::string, std::vector<org::apache::cassandra::SuperColumn> >
   getSuperRangeSlice(const org::apache::cassandra::ColumnParent& col_parent,
@@ -548,15 +616,17 @@ public:
                      const std::string& start,
                      const std::string& finish,
                      const int32_t count,
-                     org::apache::cassandra::ConsistencyLevel::type level);
+                     org::apache::cassandra::ConsistencyLevel::type read_consistency_level);
 
   std::map<std::string, std::vector<org::apache::cassandra::SuperColumn> >
-  getSuperRangeSlice(const org::apache::cassandra::ColumnParent& col_parent,
-                     const org::apache::cassandra::SlicePredicate& pred,
-                     const std::string& start,
-                     const std::string& finish,
-                     const int32_t count);
-
+  inline getSuperRangeSlice(const org::apache::cassandra::ColumnParent& col_parent,
+                            const org::apache::cassandra::SlicePredicate& pred,
+                            const std::string& start,
+                            const std::string& finish,
+                            const int32_t count) {
+	  return getSuperRangeSlice(col_parent, pred, start, finish, count, default_read_consistency_level);
+  }
+  // TODO: Add return as reference param versions of above to avoid copying on return
   /**
    * Return a list of slices using the given query object
    * @param[in] query object that encapuslates everything needed
@@ -567,19 +637,22 @@ public:
   getIndexedSlices(const IndexedSlicesQuery& query);
 
   /**
+   * @param[in] read_consistency_level Read consistency level (optional), default will be used if not specified
    * @return number of columns in a row or super column
    */
   int32_t getCount(const std::string& key,
                    const org::apache::cassandra::ColumnParent& col_parent,
                    const org::apache::cassandra::SlicePredicate& pred,
-                   org::apache::cassandra::ConsistencyLevel::type level);
+                   org::apache::cassandra::ConsistencyLevel::type read_consistency_level);
 
   /**
    * @return number of columns in a row or super column
    */
-  int32_t getCount(const std::string& key,
+  int32_t inline getCount(const std::string& key,
                    const org::apache::cassandra::ColumnParent& col_parent,
-                   const org::apache::cassandra::SlicePredicate& pred);
+                   const org::apache::cassandra::SlicePredicate& pred) {
+	  return getCount(key, col_parent, pred, default_read_consistency_level);
+  }
 
   /**
    * Create a column family
