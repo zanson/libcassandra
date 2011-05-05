@@ -406,11 +406,18 @@ public:
                    const org::apache::cassandra::SlicePredicate& pred);
 
   /**
-   * Create a column family
-   * @param[in] cf_def object representing defintion for column family to create
+   * Create a keyspace
+   * @param[in] ks_def object representing defintion for keyspace to create
    * @return the schema ID for the keyspace created
    */
   std::string createKeyspace(const KeyspaceDefinition& ks_def);
+
+  /**
+   * Update a keyspace
+   * @param[in] ks_def object representing defintion for keyspace to update
+   * @return the schema ID for the keyspace created
+   */
+  std::string updateKeyspace(const KeyspaceDefinition& ks_def);
 
   /**
    * drop a keyspace
@@ -420,11 +427,18 @@ public:
   std::string dropKeyspace(const std::string& ks_name);
 
   /**
-   * Create a keyspace
-   * @param[in] ks_def object representing defintion for keyspace to create
+   * Create a column family
+   * @param[in] cf_def object representing defintion for column family to create
    * @return the schema ID for the column family created
    */
   std::string createColumnFamily(const ColumnFamilyDefinition& cf_def);
+
+  /**
+   * Update a column family
+   * @param[in] cf_def object representing defintion for column family to update
+   * @return the schema ID for the column family created
+   */
+  std::string updateColumnFamily(const ColumnFamilyDefinition& cf_def);
 
   /**
    * drop a column family
