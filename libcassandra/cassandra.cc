@@ -199,7 +199,6 @@ void Cassandra::remove(const string &key,
   thrift_client->remove(key, col_path, createTimestamp(), ConsistencyLevel::QUORUM);
 }
 
-
 void Cassandra::remove(const string& key,
                        const string& column_family,
                        const string& super_column_name,
@@ -219,7 +218,6 @@ void Cassandra::remove(const string& key,
   }
   remove(key, col_path);
 }
-
 
 void Cassandra::removeColumn(const string& key,
                              const string& column_family,
@@ -399,14 +397,15 @@ vector<Column> Cassandra::getSliceRange(const string& key,
 }
 
 
-map<string, vector<Column> > Cassandra::getRangeSlice(const ColumnParent& col_parent,
-                                                      const SlicePredicate& pred,
-                                                      const string& start,
-                                                      const string& finish,
-                                                      const int32_t row_count,
-                                                      ConsistencyLevel::type level)
+vector<pair<string, vector<Column> > >
+Cassandra::getRangeSlice(const ColumnParent& col_parent,
+                         const SlicePredicate& pred,
+                         const string& start,
+                         const string& finish,
+                         const int32_t row_count,
+                         ConsistencyLevel::type level)
 {
-  map<string, vector<Column> > ret;
+  vector<pair<string, vector<Column> > > ret;
   vector<KeySlice> key_slices;
   KeyRange key_range;
   key_range.start_key.assign(start);
@@ -425,31 +424,33 @@ map<string, vector<Column> > Cassandra::getRangeSlice(const ColumnParent& col_pa
          it != key_slices.end();
          ++it)
     {
-      ret.insert(make_pair((*it).key, getColumnList((*it).columns)));
+      ret.push_back(make_pair((*it).key, getColumnList((*it).columns)));
     }
   }
   return ret;
 }
 
 
-map<string, vector<Column> > Cassandra::getRangeSlice(const ColumnParent& col_parent,
-                                                      const SlicePredicate& pred,
-                                                      const string& start,
-                                                      const string& finish,
-                                                      const int32_t row_count)
+vector<pair<string, vector<Column> > >
+Cassandra::getRangeSlice(const ColumnParent& col_parent,
+                         const SlicePredicate& pred,
+                         const string& start,
+                         const string& finish,
+                         const int32_t row_count)
 {
   return getRangeSlice(col_parent, pred, start, finish, row_count, ConsistencyLevel::QUORUM);
 }
 
 
-map<string, vector<SuperColumn> > Cassandra::getSuperRangeSlice(const ColumnParent& col_parent,
-                                                                const SlicePredicate& pred,
-                                                                const string& start,
-                                                                const string& finish,
-                                                                const int32_t row_count,
-                                                                ConsistencyLevel::type level)
+vector<pair<string, vector<SuperColumn> > >
+Cassandra::getSuperRangeSlice(const ColumnParent& col_parent,
+                              const SlicePredicate& pred,
+                              const string& start,
+                              const string& finish,
+                              const int32_t row_count,
+                              ConsistencyLevel::type level)
 {
-  map<string, vector<SuperColumn> > ret;
+  vector<pair<string, vector<SuperColumn> > > ret;
   vector<KeySlice> key_slices;
   KeyRange key_range;
   key_range.start_key.assign(start);
@@ -468,7 +469,7 @@ map<string, vector<SuperColumn> > Cassandra::getSuperRangeSlice(const ColumnPare
          it != key_slices.end();
          ++it)
     {
-      ret.insert(make_pair((*it).key, getSuperColumnList((*it).columns)));
+      ret.push_back(make_pair((*it).key, getSuperColumnList((*it).columns)));
     }
   }
   return ret;
@@ -476,11 +477,12 @@ map<string, vector<SuperColumn> > Cassandra::getSuperRangeSlice(const ColumnPare
 
 
 
-map<string, vector<SuperColumn> > Cassandra::getSuperRangeSlice(const ColumnParent& col_parent,
-                                                                const SlicePredicate& pred,
-                                                                const string& start,
-                                                                const string& finish,
-                                                                const int32_t row_count)
+vector<pair<string, vector<SuperColumn> > >
+Cassandra::getSuperRangeSlice(const ColumnParent& col_parent,
+                              const SlicePredicate& pred,
+                              const string& start,
+                              const string& finish,
+                              const int32_t row_count)
 {
   return getSuperRangeSlice(col_parent, pred, start, finish, row_count, ConsistencyLevel::QUORUM);
 }

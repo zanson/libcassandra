@@ -218,7 +218,7 @@ public:
               const std::string& super_column_name,
               const std::string& column_name);
 
-  /**
+ /**
    * Remove a column, possibly inside a supercolumn
    *
    * @param[in] key the column key
@@ -351,7 +351,7 @@ public:
                                                             const org::apache::cassandra::ColumnParent& col_parent,
                                                             org::apache::cassandra::SlicePredicate& pred);
 
-  std::map<std::string, std::vector<org::apache::cassandra::Column> >
+  std::vector<std::pair<std::string, std::vector<org::apache::cassandra::Column> > > 
   getRangeSlice(const org::apache::cassandra::ColumnParent& col_parent,
                 const org::apache::cassandra::SlicePredicate& pred,
                 const std::string& start,
@@ -359,14 +359,14 @@ public:
                 const int32_t row_count,
                 org::apache::cassandra::ConsistencyLevel::type level);
 
-  std::map<std::string, std::vector<org::apache::cassandra::Column> >
+  std::vector<std::pair<std::string, std::vector<org::apache::cassandra::Column> > >
   getRangeSlice(const org::apache::cassandra::ColumnParent& col_parent,
                 const org::apache::cassandra::SlicePredicate& pred,
                 const std::string& start,
                 const std::string& finish,
                 const int32_t row_count);
 
-  std::map<std::string, std::vector<org::apache::cassandra::SuperColumn> >
+  std::vector<std::pair<std::string, std::vector<org::apache::cassandra::SuperColumn> > >
   getSuperRangeSlice(const org::apache::cassandra::ColumnParent& col_parent,
                      const org::apache::cassandra::SlicePredicate& pred,
                      const std::string& start,
@@ -374,7 +374,7 @@ public:
                      const int32_t count,
                      org::apache::cassandra::ConsistencyLevel::type level);
 
-  std::map<std::string, std::vector<org::apache::cassandra::SuperColumn> >
+  std::vector<std::pair<std::string, std::vector<org::apache::cassandra::SuperColumn> > >
   getSuperRangeSlice(const org::apache::cassandra::ColumnParent& col_parent,
                      const org::apache::cassandra::SlicePredicate& pred,
                      const std::string& start,
