@@ -488,38 +488,31 @@ Cassandra::getSuperRangeSlice(const ColumnParent& col_parent,
 }
 
 
-map<string, map<string, string> >
+vector<pair<string, vector<Column> > >
 Cassandra::getIndexedSlices(const IndexedSlicesQuery& query)
 {
-  map<string, map<string, string> > ret_map;
-  vector<KeySlice> ret;
+  vector<KeySlice> key_slices;
   SlicePredicate thrift_slice_pred= createSlicePredicateObject(query);
   ColumnParent thrift_col_parent;
   thrift_col_parent.column_family.assign(query.getColumnFamily());
-  thrift_client->get_indexed_slices(ret, 
+
+  thrift_client->get_indexed_slices(key_slices, 
                                     thrift_col_parent, 
                                     query.getIndexClause(),
                                     thrift_slice_pred,
                                     query.getConsistencyLevel());
-  
-  for(vector<KeySlice>::iterator it= ret.begin();
-      it != ret.end();
+
+  vector<pair<string, vector<Column> > > ret;
+
+  for(vector<KeySlice>::iterator it= key_slices.begin();
+      it != key_slices.end();
       ++it)
   {
-    vector<Column> thrift_cols= getColumnList((*it).columns);
-    map<string, string> rows;
-    for (vector<Column>::iterator inner_it= thrift_cols.begin();
-         inner_it != thrift_cols.end();
-         ++inner_it)
-    {
-      rows.insert(make_pair((*inner_it).name, (*inner_it).value));
-    }
-    ret_map.insert(make_pair((*it).key, rows));
+    ret.push_back(make_pair((*it).key, getColumnList((*it).columns)));
   }
 
-  return ret_map;
+  return ret;
 }
-
 
 int32_t Cassandra::getCount(const string& key, 
                             const ColumnParent& col_parent,

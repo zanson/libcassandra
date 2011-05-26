@@ -385,9 +385,9 @@ public:
    * Returns a list of slices using the given query object
    * @param[in] query object that encapuslates everything needed
    *                  for a query using secondary indexes
-   * @return a map of row keys to column names and values
+   * @return a list of row keys to column names and values
    */
-  std::map<std::string, std::map<std::string, std::string> >
+  std::vector<std::pair<std::string, std::vector<org::apache::cassandra::Column> > >
   getIndexedSlices(const IndexedSlicesQuery& query);
 
   /**
