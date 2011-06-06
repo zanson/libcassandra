@@ -17,8 +17,9 @@
 #include <iostream>
 // TODO use boost::shared_ptr instead as used in Thrift generated code?:
 #include <tr1/memory>   
+#include <tr1/tuple>
 
-#include "../libgenthrift/cassandra_types.h"
+#include "libgenthrift/cassandra_types.h"
 
 #include "libcassandra/indexed_slices_query.h"
 #include "libcassandra/keyspace_definition.h"
@@ -77,6 +78,25 @@ std::ostream& operator<< (std::ostream& os, const ColumnSlicePredicate & col_sli
 
 class Cassandra
 {
+public:
+
+  /**
+    * enclosures the insertion of one column
+    */
+  typedef std::tr1::tuple<std::string,  //column family
+                          std::string,  //key
+                          std::string,  //name
+                          std::string   //value
+                         > ColumnInsertTuple;
+  /**
+    * enclosures the insertion of one super column
+    */
+  typedef std::tr1::tuple<std::string,  //column family
+                          std::string,  //key
+                          std::string,  //supercolumn
+                          std::string,  //name
+                          std::string   //value
+                         > SuperColumnInsertTuple;
 
 public:
 
@@ -162,6 +182,22 @@ public:
                     const std::string& super_column_name,
                     const std::string& column_name,
                     const std::string& value);
+
+  /**
+   * Insert a column, possibly inside a supercolumn
+   *
+   * @param[in] key the column key
+   * @param[in] column_family the column family
+   * @param[in] super_column_name the super column name (optional)
+   * @param[in] column_name the column name
+   * @param[in] value the column value
+   */
+  void insertColumn(const std::string& key,
+                    const std::string& column_family,
+                    const std::string& super_column_name,
+                    const std::string& column_name,
+                    const int64_t value);
+
 
   /**
    * Insert a column, directly in a columnfamily
@@ -529,11 +565,18 @@ public:
                    const org::apache::cassandra::SlicePredicate& pred);
 
   /**
-   * Create a column family
-   * @param[in] cf_def object representing defintion for column family to create
+   * Create a keyspace
+   * @param[in] ks_def object representing defintion for keyspace to create
    * @return the schema ID for the keyspace created
    */
   std::string createKeyspace(const KeyspaceDefinition& ks_def);
+
+  /**
+   * Update a keyspace
+   * @param[in] ks_def object representing defintion for keyspace to update
+   * @return the schema ID for the keyspace created
+   */
+  std::string updateKeyspace(const KeyspaceDefinition& ks_def);
 
   /**
    * drop a keyspace
@@ -543,11 +586,18 @@ public:
   std::string dropKeyspace(const std::string& ks_name);
 
   /**
-   * Create a keyspace
-   * @param[in] ks_def object representing defintion for keyspace to create
+   * Create a column family
+   * @param[in] cf_def object representing defintion for column family to create
    * @return the schema ID for the column family created
    */
   std::string createColumnFamily(const ColumnFamilyDefinition& cf_def);
+
+  /**
+   * Update a column family
+   * @param[in] cf_def object representing defintion for column family to update
+   * @return the schema ID for the column family created
+   */
+  std::string updateColumnFamily(const ColumnFamilyDefinition& cf_def);
 
   /**
    * drop a column family
@@ -581,6 +631,25 @@ public:
    */
   int getPort() const;
 
+  /**
+   * Gets the token ring; a map of ranges to host addresses. Represented as a set of TokenRange
+   * @param[in] keyspace the name of the keyspace
+   * @return token ring map
+   */
+  std::vector<org::apache::cassandra::TokenRange> describeRing(const std::string &keyspace);
+
+  /**
+   * Inserts in the same call to cassandra a set of columns and supercolumns
+   * @param[in] columns to insert
+   * @param[in] super columns to insert
+   */
+  void batchInsert(const std::vector<ColumnInsertTuple> &columns,
+                   const std::vector<SuperColumnInsertTuple> &super_columns, 
+                   org::apache::cassandra::ConsistencyLevel::type level);
+
+  void batchInsert(const std::vector<ColumnInsertTuple> &columns,
+                   const std::vector<SuperColumnInsertTuple> &super_columns); 
+ 
 private:
 
   /**
@@ -602,6 +671,16 @@ private:
 
   Cassandra(const Cassandra&);
   Cassandra &operator=(const Cassandra&);
+
+  typedef std::map<std::string, 
+                   std::map<std::string, 
+                            std::vector<org::apache::cassandra::Mutation> 
+                           > 
+                  > MutationsMap;
+
+  static void addToMap(const ColumnInsertTuple &tuple, MutationsMap &mutations); 
+
+  static void addToMap(const SuperColumnInsertTuple &tuple, MutationsMap &mutations); 
 
 };
 

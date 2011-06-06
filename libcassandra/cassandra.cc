@@ -217,6 +217,17 @@ void Cassandra::insertColumn(const string& key,
 
 void Cassandra::insertColumn(const string& key,
                              const string& column_family,
+                             const string& super_column_name,
+                             const string& column_name,
+                             const int64_t value)
+{
+  insertColumn(key, column_family, super_column_name, column_name, serializeLong(value), ConsistencyLevel::QUORUM);
+}
+
+
+
+void Cassandra::insertColumn(const string& key,
+                             const string& column_family,
                              const string& column_name,
                              const string& value)
 {
@@ -767,11 +778,10 @@ int32_t Cassandra::getCount(const string& key,
 
 vector<KeyspaceDefinition> Cassandra::getKeyspaces()
 {
-  if (key_spaces.empty())
-  {
-    vector<KsDef> thrift_ks_defs;
-    thrift_client->describe_keyspaces(thrift_ks_defs);
-    for (vector<KsDef>::iterator it= thrift_ks_defs.begin();
+  vector<KsDef> thrift_ks_defs;
+  thrift_client->describe_keyspaces(thrift_ks_defs);
+  key_spaces.clear();
+  for (vector<KsDef>::iterator it= thrift_ks_defs.begin();
          it != thrift_ks_defs.end();
          ++it)
     {
@@ -783,7 +793,7 @@ vector<KeyspaceDefinition> Cassandra::getKeyspaces()
                                thrift_entry.cf_defs);
       key_spaces.push_back(entry);
     }
-  }
+
   return key_spaces;
 }
 
@@ -796,6 +806,13 @@ string Cassandra::createColumnFamily(const ColumnFamilyDefinition& cf_def)
   return schema_id;
 }
 
+string Cassandra::updateColumnFamily(const ColumnFamilyDefinition& cf_def)
+{
+  string schema_id;
+  CfDef thrift_cf_def= createCfDefObject(cf_def);
+  thrift_client->system_update_column_family(schema_id, thrift_cf_def);
+  return schema_id;
+}
 
 string Cassandra::dropColumnFamily(const string& cf_name)
 {
@@ -813,6 +830,13 @@ string Cassandra::createKeyspace(const KeyspaceDefinition& ks_def)
   return ret;
 }
 
+string Cassandra::updateKeyspace(const KeyspaceDefinition& ks_def)
+{
+  string ret;
+  KsDef thrift_ks_def= createKsDefObject(ks_def);
+  thrift_client->system_update_keyspace(ret, thrift_ks_def);
+  return ret;
+}
 
 string Cassandra::dropKeyspace(const string& ks_name)
 {
@@ -853,6 +877,124 @@ int Cassandra::getPort() const
   return port;
 }
 
+
+std::vector<org::apache::cassandra::TokenRange> Cassandra::describeRing(const std::string &keyspace) {
+
+  vector<org::apache::cassandra::TokenRange> ret;
+  thrift_client->describe_ring(ret, keyspace);
+  return ret;
+   
+}
+
+void Cassandra::batchInsert(const std::vector<ColumnInsertTuple> &columns,
+                   const std::vector<SuperColumnInsertTuple> &super_columns, 
+                   org::apache::cassandra::ConsistencyLevel::type level) {
+  MutationsMap mutations;
+
+  for (std::vector<ColumnInsertTuple>::const_iterator column = columns.begin();
+       column != columns.end(); column++) {
+    addToMap(*column, mutations);
+  }
+
+  for (std::vector<SuperColumnInsertTuple>::const_iterator super_column = super_columns.begin();
+       super_column != super_columns.end(); super_column++) {
+    addToMap(*super_column, mutations);
+  }
+
+  thrift_client->batch_mutate(mutations, level);
+}
+
+void Cassandra::batchInsert(const std::vector<ColumnInsertTuple> &columns,
+                   const std::vector<SuperColumnInsertTuple> &super_columns) {
+
+  batchInsert(columns, super_columns, ConsistencyLevel::QUORUM);
+}
+
+void Cassandra::addToMap(const ColumnInsertTuple &tuple, MutationsMap &mutations) {
+
+  std::string column_family = std::tr1::get<0>(tuple);
+  std::string key           = std::tr1::get<1>(tuple);
+  std::string name          = std::tr1::get<2>(tuple);
+  std::string value         = std::tr1::get<3>(tuple);
+
+  org::apache::cassandra::Mutation mutation;
+
+  mutation.column_or_supercolumn.column.name      = name; 
+  mutation.column_or_supercolumn.column.value     = value; 
+  mutation.column_or_supercolumn.column.timestamp = createTimestamp(); 
+  mutation.column_or_supercolumn.__isset.column   = true;
+  mutation.__isset.column_or_supercolumn          = true;
+
+  if (mutations.find(key) == mutations.end()) {
+    mutations[key] = std::map<std::string, 
+                     std::vector<org::apache::cassandra::Mutation> >();
+  } 
+
+  std::map<std::string, 
+             std::vector<org::apache::cassandra::Mutation> 
+          > &mutations_per_cf = mutations[key];
+
+  if (mutations_per_cf.find(column_family) == mutations_per_cf.end()) {
+    mutations_per_cf[column_family] = std::vector<org::apache::cassandra::Mutation>();
+  }
+
+  std::vector<org::apache::cassandra::Mutation> &mutation_list = mutations_per_cf[column_family];
+
+  mutation_list.push_back(mutation);
+
+}
+
+void Cassandra::addToMap(const SuperColumnInsertTuple &tuple, MutationsMap &mutations) {
+
+  std::string column_family = std::tr1::get<0>(tuple);
+  std::string key           = std::tr1::get<1>(tuple);
+  std::string super_column  = std::tr1::get<2>(tuple);
+  std::string name          = std::tr1::get<3>(tuple);
+  std::string value         = std::tr1::get<4>(tuple);
+
+  if (mutations.find(key) == mutations.end()) {
+    mutations[key] = std::map<std::string, std::vector<org::apache::cassandra::Mutation> >();
+  } 
+
+  std::map<std::string, 
+             std::vector<org::apache::cassandra::Mutation> 
+          > &mutations_per_cf = mutations[key];
+
+  if (mutations_per_cf.find(column_family) == mutations_per_cf.end()) {
+    mutations_per_cf[column_family] = std::vector<org::apache::cassandra::Mutation>();
+  }
+
+  std::vector<org::apache::cassandra::Mutation> &mutation_list = mutations_per_cf[column_family];
+
+  org::apache::cassandra::Mutation mutation;
+
+  //this is awful, is there a better way?
+
+  for (std::vector<org::apache::cassandra::Mutation>::iterator it = mutation_list.begin();
+       it != mutation_list.end(); it++) {
+
+    if (it->column_or_supercolumn.__isset.super_column &&  
+        it->column_or_supercolumn.super_column.name == super_column) {
+      mutation = *it;      
+      mutation_list.erase(it);
+      break;
+    }
+  }
+
+  mutation.column_or_supercolumn.super_column.name = super_column;
+  mutation.column_or_supercolumn.__isset.super_column = true;
+  mutation.__isset.column_or_supercolumn = true;
+
+  Column column;
+
+  column.name = name;
+  column.value = value;
+  column.timestamp = createTimestamp();
+
+  mutation.column_or_supercolumn.super_column.columns.push_back(column);
+
+  mutation_list.push_back(mutation);
+}
 
 bool Cassandra::findKeyspace(const string& name)
 {

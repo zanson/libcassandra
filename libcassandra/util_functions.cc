@@ -119,10 +119,20 @@ CfDef createCfDefObject(const ColumnFamilyDefinition& cf_def)
     thrift_cf_def.row_cache_size= cf_def.getRowCacheSize();
     thrift_cf_def.__isset.row_cache_size= true;
   }
+  if (cf_def.isRowCacheSavePeriodSet())
+  {
+    thrift_cf_def.row_cache_save_period_in_seconds = cf_def.getRowCacheSavePeriod();
+    thrift_cf_def.__isset.row_cache_save_period_in_seconds = true;
+  }
   if (cf_def.isKeyCacheSizeSet())
   {
     thrift_cf_def.key_cache_size= cf_def.getKeyCacheSize();
     thrift_cf_def.__isset.key_cache_size= true;
+  }
+  if (cf_def.isKeyCacheSavePeriodSet())
+  {
+    thrift_cf_def.key_cache_save_period_in_seconds = cf_def.getKeyCacheSavePeriod();
+    thrift_cf_def.__isset.key_cache_save_period_in_seconds = true;
   }
   if (cf_def.isReadRepairChanceSet())
   {
