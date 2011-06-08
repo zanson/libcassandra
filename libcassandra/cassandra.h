@@ -932,8 +932,8 @@ inline void Cassandra::removeSuperColumn(const std::string& key,
 }
 
 inline void Cassandra::get_columns(std::vector<org::apache::cassandra::Column>& result_columns,
-                        const std::std::string& key,
-                        const std::std::string& column_family,
+                        const std::string& key,
+                        const std::string& column_family,
                         const ColumnSlicePredicate& column_slice_predicate)
 {
   get_columns(result_columns, key, column_family, column_slice_predicate, default_read_consistency_level);
