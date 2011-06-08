@@ -173,13 +173,14 @@ string Cassandra::getCurrentKeyspace() const
 }
 
 
-void Cassandra::insertColumn(const string& key,
+void Cassandra::insertColumn(const int64_t timestamp,
+			     const string& key,
                              const string& column_family,
                              const string& super_column_name,
                              const string& column_name,
                              const string& value,
                              ConsistencyLevel::type level,
-                             int32_t ttl= 0)
+                             const int32_t ttl)
 {
   ColumnParent col_parent;
   col_parent.column_family.assign(column_family);
@@ -191,7 +192,7 @@ void Cassandra::insertColumn(const string& key,
   Column col;
   col.name.assign(column_name);
   col.value.assign(value);
-  col.timestamp= createTimestamp();
+  col.timestamp= timestamp;
   if (ttl) 
   {
     col.ttl=ttl;
@@ -205,13 +206,62 @@ void Cassandra::insertColumn(const string& key,
 }
 
 
+void Cassandra::insertColumn(const int64_t timestamp,
+			     const string& key,
+                             const string& column_family,
+                             const string& super_column_name,
+                             const string& column_name,
+                             const string& value,
+			     const int32_t ttl)
+{
+  insertColumn(timestamp, key, column_family, super_column_name, column_name, value, ConsistencyLevel::QUORUM, ttl);
+}
+
+
+void Cassandra::insertColumn(const int64_t timestamp,
+			     const string& key,
+                             const string& column_family,
+                             const string& super_column_name,
+                             const string& column_name,
+                             const int64_t value,
+			     const int32_t ttl)
+{
+  insertColumn(timestamp, key, column_family, super_column_name, column_name, serializeLong(value), ConsistencyLevel::QUORUM, ttl);
+}
+
+
+
+void Cassandra::insertColumn(const int64_t timestamp,
+			     const string& key,
+                             const string& column_family,
+                             const string& column_name,
+                             const string& value,
+			     const int32_t ttl)
+{
+  insertColumn(timestamp, key, column_family, "", column_name, value, ConsistencyLevel::QUORUM, ttl);
+}
+
+
+void Cassandra::insertColumn(const int64_t timestamp,
+			     const string& key,
+                             const string& column_family,
+                             const string& column_name,
+                             const int64_t value,
+			     const int32_t ttl)
+{
+  insertColumn(timestamp, key, column_family, "", column_name, serializeLong(value), ConsistencyLevel::QUORUM, ttl);
+}
+
+
 void Cassandra::insertColumn(const string& key,
                              const string& column_family,
                              const string& super_column_name,
                              const string& column_name,
-                             const string& value)
+                             const string& value,
+                             ConsistencyLevel::type level,
+                             const int32_t ttl)
 {
-  insertColumn(key, column_family, super_column_name, column_name, value, ConsistencyLevel::QUORUM);
+  insertColumn(createTimestamp(), key, column_family, super_column_name, column_name, value, level, ttl);
 }
 
 
@@ -219,9 +269,21 @@ void Cassandra::insertColumn(const string& key,
                              const string& column_family,
                              const string& super_column_name,
                              const string& column_name,
-                             const int64_t value)
+                             const string& value,
+			     const int32_t ttl)
 {
-  insertColumn(key, column_family, super_column_name, column_name, serializeLong(value), ConsistencyLevel::QUORUM);
+  insertColumn(key, column_family, super_column_name, column_name, value, ConsistencyLevel::QUORUM, ttl);
+}
+
+
+void Cassandra::insertColumn(const string& key,
+                             const string& column_family,
+                             const string& super_column_name,
+                             const string& column_name,
+                             const int64_t value,
+			     const int32_t ttl)
+{
+  insertColumn(key, column_family, super_column_name, column_name, serializeLong(value), ConsistencyLevel::QUORUM, ttl);
 }
 
 
@@ -229,19 +291,20 @@ void Cassandra::insertColumn(const string& key,
 void Cassandra::insertColumn(const string& key,
                              const string& column_family,
                              const string& column_name,
-                             const string& value)
+                             const string& value,
+			     const int32_t ttl)
 {
-  insertColumn(key, column_family, "", column_name, value, ConsistencyLevel::QUORUM);
+  insertColumn(key, column_family, "", column_name, value, ConsistencyLevel::QUORUM, ttl);
 }
 
 
 void Cassandra::insertColumn(const string& key,
                              const string& column_family,
                              const string& column_name,
-                             const int64_t value)
+                             const int64_t value,
+			     const int32_t ttl)
 {
-  //int64_t store_value= htonll(value);
-  insertColumn(key, column_family, "", column_name, serializeLong(value), ConsistencyLevel::QUORUM);
+  insertColumn(key, column_family, "", column_name, serializeLong(value), ConsistencyLevel::QUORUM, ttl);
 }
 
 
@@ -886,29 +949,45 @@ std::vector<org::apache::cassandra::TokenRange> Cassandra::describeRing(const st
    
 }
 
-void Cassandra::batchInsert(const std::vector<ColumnInsertTuple> &columns,
-                   const std::vector<SuperColumnInsertTuple> &super_columns, 
-                   org::apache::cassandra::ConsistencyLevel::type level) {
-  MutationsMap mutations;
 
+void Cassandra::batchInsert(const std::vector<ColumnInsertTuple> &columns,
+			    const std::vector<SuperColumnInsertTuple> &super_columns,
+			    org::apache::cassandra::ConsistencyLevel::type level) {
+  MutationsMap mutations;
+  
   for (std::vector<ColumnInsertTuple>::const_iterator column = columns.begin();
        column != columns.end(); column++) {
     addToMap(*column, mutations);
   }
-
+  
   for (std::vector<SuperColumnInsertTuple>::const_iterator super_column = super_columns.begin();
        super_column != super_columns.end(); super_column++) {
     addToMap(*super_column, mutations);
   }
+  
+  thrift_client->batch_mutate(mutations, level);
+}
+
+
+void Cassandra::batchInsert(const std::vector<TimestampedColumnInsertTuple> &columns,
+			    org::apache::cassandra::ConsistencyLevel::type level) {
+  MutationsMap mutations;
+
+  for (std::vector<TimestampedColumnInsertTuple>::const_iterator column = columns.begin();
+       column != columns.end(); column++) {
+    addToMap(*column, mutations);
+  }
 
   thrift_client->batch_mutate(mutations, level);
 }
+
 
 void Cassandra::batchInsert(const std::vector<ColumnInsertTuple> &columns,
                    const std::vector<SuperColumnInsertTuple> &super_columns) {
 
   batchInsert(columns, super_columns, ConsistencyLevel::QUORUM);
 }
+
 
 void Cassandra::addToMap(const ColumnInsertTuple &tuple, MutationsMap &mutations) {
 
@@ -943,6 +1022,42 @@ void Cassandra::addToMap(const ColumnInsertTuple &tuple, MutationsMap &mutations
   mutation_list.push_back(mutation);
 
 }
+
+
+void Cassandra::addToMap(const TimestampedColumnInsertTuple &tuple, MutationsMap &mutations) {
+  int64_t     timestamp     = std::tr1::get<0>(tuple);
+  std::string column_family = std::tr1::get<1>(tuple);
+  std::string key           = std::tr1::get<2>(tuple);
+  std::string name          = std::tr1::get<3>(tuple);
+  std::string value         = std::tr1::get<4>(tuple);
+
+  org::apache::cassandra::Mutation mutation;
+
+  mutation.column_or_supercolumn.column.name      = name; 
+  mutation.column_or_supercolumn.column.value     = value; 
+  mutation.column_or_supercolumn.column.timestamp = timestamp; 
+  mutation.column_or_supercolumn.__isset.column   = true;
+  mutation.__isset.column_or_supercolumn          = true;
+
+  if (mutations.find(key) == mutations.end()) {
+    mutations[key] = std::map<std::string, 
+                     std::vector<org::apache::cassandra::Mutation> >();
+  } 
+
+  std::map<std::string, 
+             std::vector<org::apache::cassandra::Mutation> 
+          > &mutations_per_cf = mutations[key];
+
+  if (mutations_per_cf.find(column_family) == mutations_per_cf.end()) {
+    mutations_per_cf[column_family] = std::vector<org::apache::cassandra::Mutation>();
+  }
+
+  std::vector<org::apache::cassandra::Mutation> &mutation_list = mutations_per_cf[column_family];
+
+  mutation_list.push_back(mutation);
+
+}
+
 
 void Cassandra::addToMap(const SuperColumnInsertTuple &tuple, MutationsMap &mutations) {
 

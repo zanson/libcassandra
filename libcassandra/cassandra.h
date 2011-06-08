@@ -76,27 +76,36 @@ public:
 
 std::ostream& operator<< (std::ostream& os, const ColumnSlicePredicate & col_slice_predicate);
 
+/**
+ * enclosures the insertion of one column
+ */
+typedef std::tr1::tuple<std::string,  //column family
+  std::string,  //key
+  std::string,  //name
+  std::string   //value
+  > ColumnInsertTuple;
+ 
+/**
+ * enclosures the insertion of one super column
+ */
+typedef std::tr1::tuple<std::string,  //column family
+  std::string,  //key
+  std::string,  //supercolumn
+  std::string,  //name
+  std::string   //value
+  > SuperColumnInsertTuple;
+ 
+typedef std::tr1::tuple<int64_t,      //timestamp
+  std::string,  //column family
+  std::string,  //key
+  std::string,  //name
+  std::string   //value
+  > TimestampedColumnInsertTuple;
+ 
+
 class Cassandra
 {
 public:
-
-  /**
-    * enclosures the insertion of one column
-    */
-  typedef std::tr1::tuple<std::string,  //column family
-                          std::string,  //key
-                          std::string,  //name
-                          std::string   //value
-                         > ColumnInsertTuple;
-  /**
-    * enclosures the insertion of one super column
-    */
-  typedef std::tr1::tuple<std::string,  //column family
-                          std::string,  //key
-                          std::string,  //supercolumn
-                          std::string,  //name
-                          std::string   //value
-                         > SuperColumnInsertTuple;
 
 public:
 
@@ -166,7 +175,7 @@ public:
                     const std::string& column_name,
                     const std::string& value,
                     org::apache::cassandra::ConsistencyLevel::type level,
-                    int32_t ttl);
+                    const int32_t ttl=0);
 
   /**
    * Insert a column, possibly inside a supercolumn
@@ -181,7 +190,8 @@ public:
                     const std::string& column_family,
                     const std::string& super_column_name,
                     const std::string& column_name,
-                    const std::string& value);
+                    const std::string& value,
+                    const int32_t ttl=0);
 
   /**
    * Insert a column, possibly inside a supercolumn
@@ -196,7 +206,8 @@ public:
                     const std::string& column_family,
                     const std::string& super_column_name,
                     const std::string& column_name,
-                    const int64_t value);
+                    const int64_t value,
+                    const int32_t ttl=0);
 
 
   /**
@@ -210,7 +221,8 @@ public:
   void insertColumn(const std::string& key,
                     const std::string& column_family,
                     const std::string& column_name,
-                    const std::string& value);
+                    const std::string& value,
+                    const int32_t ttl=0);
 
   /**
    * Insert a column, directly in a columnfamily
@@ -223,7 +235,99 @@ public:
   void insertColumn(const std::string& key,
                     const std::string& column_family,
                     const std::string& column_name,
-                    const int64_t value);
+                    const int64_t value,
+                    const int32_t ttl=0);
+
+  /**
+   * Insert a column, possibly inside a supercolumn
+   *
+   * @param[in] timestamp the timestamp to insert with
+   * @param[in] key the column key
+   * @param[in] column_family the column family
+   * @param[in] super_column_name the super column name (optional)
+   * @param[in] column_name the column name
+   * @param[in] value the column value
+   * @param[in] level consistency level
+   * @param[in] ttl time to live
+   */
+  void insertColumn(const int64_t timestamp,
+		    const std::string& key,
+                    const std::string& column_family,
+                    const std::string& super_column_name,
+                    const std::string& column_name,
+                    const std::string& value,
+                    org::apache::cassandra::ConsistencyLevel::type level,
+                    const int32_t ttl=0);
+
+  /**
+   * Insert a column, possibly inside a supercolumn
+   *
+   * @param[in] timestamp the timestamp to insert with
+   * @param[in] key the column key
+   * @param[in] column_family the column family
+   * @param[in] super_column_name the super column name (optional)
+   * @param[in] column_name the column name
+   * @param[in] value the column value
+   */
+  void insertColumn(const int64_t timestamp,
+		    const std::string& key,
+                    const std::string& column_family,
+                    const std::string& super_column_name,
+                    const std::string& column_name,
+                    const std::string& value,
+                    const int32_t ttl=0);
+
+
+  /**
+   * Insert a column, possibly inside a supercolumn
+   *
+   * @param[in] timestamp the timestamp to insert with
+   * @param[in] key the column key
+   * @param[in] column_family the column family
+   * @param[in] super_column_name the super column name (optional)
+   * @param[in] column_name the column name
+   * @param[in] value the column value
+   */
+  void insertColumn(const int64_t timestamp,
+		    const std::string& key,
+                    const std::string& column_family,
+                    const std::string& super_column_name,
+                    const std::string& column_name,
+                    const int64_t value,
+                    const int32_t ttl=0);
+
+
+  /**
+   * Insert a column, directly in a columnfamily
+   *
+   * @param[in] timestamp the timestamp to insert with
+   * @param[in] key the column key
+   * @param[in] column_family the column family
+   * @param[in] column_name the column name
+   * @param[in] value the column value
+   */
+  void insertColumn(const int64_t timestamp,
+		    const std::string& key,
+                    const std::string& column_family,
+                    const std::string& column_name,
+                    const std::string& value,
+                    const int32_t ttl=0);
+
+  /**
+   * Insert a column, directly in a columnfamily
+   *
+   * @param[in] timestamp the timestamp to insert with
+   * @param[in] key the column key
+   * @param[in] column_family the column family
+   * @param[in] column_name the column name
+   * @param[in] value the column value
+   */
+  void insertColumn(const int64_t timestamp,
+		    const std::string& key,
+                    const std::string& column_family,
+                    const std::string& column_name,
+                    const int64_t value,
+                    const int32_t ttl=0);
 
   /**
    * Removes all the columns that match the given column path
@@ -647,6 +751,11 @@ public:
                    const std::vector<SuperColumnInsertTuple> &super_columns, 
                    org::apache::cassandra::ConsistencyLevel::type level);
 
+
+  void batchInsert(const std::vector<TimestampedColumnInsertTuple> &columns,
+                   org::apache::cassandra::ConsistencyLevel::type level);
+
+
   void batchInsert(const std::vector<ColumnInsertTuple> &columns,
                    const std::vector<SuperColumnInsertTuple> &super_columns); 
  
@@ -679,7 +788,7 @@ private:
                   > MutationsMap;
 
   static void addToMap(const ColumnInsertTuple &tuple, MutationsMap &mutations); 
-
+  static void addToMap(const TimestampedColumnInsertTuple &tuple, MutationsMap &mutations); 
   static void addToMap(const SuperColumnInsertTuple &tuple, MutationsMap &mutations); 
 
 };
