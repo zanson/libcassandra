@@ -107,8 +107,6 @@ class Cassandra
 {
 public:
 
-public:
-
   Cassandra();
   Cassandra(org::apache::cassandra::CassandraClient *in_thrift_client,
             const std::string &in_host,
@@ -795,8 +793,12 @@ private:
   static void addToMap(const SuperColumnInsertTuple &tuple, MutationsMap &mutations);
 
 };
+} /* end namespace libcassandra */
 
 #include "libcassandra/util_functions.h"
+
+namespace libcassandra
+{
 
 inline void Cassandra::insertColumn(const int64_t timestamp,
                              const string& key,
@@ -1061,7 +1063,7 @@ inline void Cassandra::batchInsert(const std::vector<ColumnInsertTuple> &columns
   batchInsert(columns, super_columns, org::apache::cassandra::ConsistencyLevel::QUORUM);
 }
 
-
 } /* end namespace libcassandra */
+
 
 #endif /* __LIBCASSANDRA_CASSANDRA_H */
