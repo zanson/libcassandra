@@ -801,11 +801,11 @@ namespace libcassandra
 {
 
 inline void Cassandra::insertColumn(const int64_t timestamp,
-                             const string& key,
-                             const string& column_family,
-                             const string& super_column_name,
-                             const string& column_name,
-                             const string& value,
+                             const std::string& key,
+                             const std::string& column_family,
+                             const std::string& super_column_name,
+                             const std::string& column_name,
+                             const std::string& value,
                              const int32_t ttl)
 {
   insertColumn(timestamp, key, column_family, super_column_name, column_name, value, org::apache::cassandra::ConsistencyLevel::QUORUM, ttl);
@@ -813,10 +813,10 @@ inline void Cassandra::insertColumn(const int64_t timestamp,
 
 
 inline void Cassandra::insertColumn(const int64_t timestamp,
-                             const string& key,
-                             const string& column_family,
-                             const string& super_column_name,
-                             const string& column_name,
+                             const std::string& key,
+                             const std::string& column_family,
+                             const std::string& super_column_name,
+                             const std::string& column_name,
                              const int64_t value,
                              const int32_t ttl)
 {
@@ -826,10 +826,10 @@ inline void Cassandra::insertColumn(const int64_t timestamp,
 
 
 inline void Cassandra::insertColumn(const int64_t timestamp,
-                             const string& key,
-                             const string& column_family,
-                             const string& column_name,
-                             const string& value,
+                             const std::string& key,
+                             const std::string& column_family,
+                             const std::string& column_name,
+                             const std::string& value,
                              const int32_t ttl)
 {
   insertColumn(timestamp, key, column_family, "", column_name, value, org::apache::cassandra::ConsistencyLevel::QUORUM, ttl);
@@ -837,9 +837,9 @@ inline void Cassandra::insertColumn(const int64_t timestamp,
 
 
 inline void Cassandra::insertColumn(const int64_t timestamp,
-                             const string& key,
-                             const string& column_family,
-                             const string& column_name,
+                             const std::string& key,
+                             const std::string& column_family,
+                             const std::string& column_name,
                              const int64_t value,
                              const int32_t ttl)
 {
@@ -847,11 +847,11 @@ inline void Cassandra::insertColumn(const int64_t timestamp,
 }
 
 
-inline void Cassandra::insertColumn(const string& key,
-                             const string& column_family,
-                             const string& super_column_name,
-                             const string& column_name,
-                             const string& value,
+inline void Cassandra::insertColumn(const std::string& key,
+                             const std::string& column_family,
+                             const std::string& super_column_name,
+                             const std::string& column_name,
+                             const std::string& value,
                              const org::apache::cassandra::ConsistencyLevel::type level,
                              const int32_t ttl)
 {
@@ -859,21 +859,21 @@ inline void Cassandra::insertColumn(const string& key,
 }
 
 
-inline void Cassandra::insertColumn(const string& key,
-                             const string& column_family,
-                             const string& super_column_name,
-                             const string& column_name,
-                             const string& value,
+inline void Cassandra::insertColumn(const std::string& key,
+                             const std::string& column_family,
+                             const std::string& super_column_name,
+                             const std::string& column_name,
+                             const std::string& value,
                              const int32_t ttl)
 {
   insertColumn(key, column_family, super_column_name, column_name, value, org::apache::cassandra::ConsistencyLevel::QUORUM, ttl);
 }
 
 
-inline void Cassandra::insertColumn(const string& key,
-                             const string& column_family,
-                             const string& super_column_name,
-                             const string& column_name,
+inline void Cassandra::insertColumn(const std::string& key,
+                             const std::string& column_family,
+                             const std::string& super_column_name,
+                             const std::string& column_name,
                              const int64_t value,
                              const int32_t ttl)
 {
@@ -882,26 +882,26 @@ inline void Cassandra::insertColumn(const string& key,
 
 
 
-inline void Cassandra::insertColumn(const string& key,
-                             const string& column_family,
-                             const string& column_name,
-                             const string& value,
+inline void Cassandra::insertColumn(const std::string& key,
+                             const std::string& column_family,
+                             const std::string& column_name,
+                             const std::string& value,
                              const int32_t ttl)
 {
   insertColumn(key, column_family, "", column_name, value, org::apache::cassandra::ConsistencyLevel::QUORUM, ttl);
 }
 
 
-inline void Cassandra::insertColumn(const string& key,
-                             const string& column_family,
-                             const string& column_name,
+inline void Cassandra::insertColumn(const std::string& key,
+                             const std::string& column_family,
+                             const std::string& column_name,
                              const int64_t value,
                              const int32_t ttl)
 {
   insertColumn(key, column_family, "", column_name, serializeLong(value), org::apache::cassandra::ConsistencyLevel::QUORUM, ttl);
 }
 
-inline void Cassandra::remove(const string &key,
+inline void Cassandra::remove(const std::string &key,
                        const org::apache::cassandra::ColumnPath &col_path,
                        const org::apache::cassandra::ConsistencyLevel::type level)
 {
@@ -909,103 +909,103 @@ inline void Cassandra::remove(const string &key,
 }
 
 
-inline void Cassandra::remove(const string &key,
+inline void Cassandra::remove(const std::string &key,
                        const org::apache::cassandra::ColumnPath &col_path)
 {
   remove(createTimestamp(), key, col_path, org::apache::cassandra::ConsistencyLevel::QUORUM);
 }
 
-inline void Cassandra::removeColumn(const string& key,
-                             const string& column_family,
-                             const string& super_column_name,
-                             const string& column_name)
+inline void Cassandra::removeColumn(const std::string& key,
+                             const std::string& column_family,
+                             const std::string& super_column_name,
+                             const std::string& column_name)
 {
   remove(key, column_family, super_column_name, column_name);
 }
 
 
-inline void Cassandra::removeSuperColumn(const string& key,
-                                  const string& column_family,
-                                  const string& super_column_name)
+inline void Cassandra::removeSuperColumn(const std::string& key,
+                                  const std::string& column_family,
+                                  const std::string& super_column_name)
 {
   remove(key, column_family, super_column_name, "");
 }
 
 inline void Cassandra::get_columns(std::vector<org::apache::cassandra::Column>& result_columns,
-                        const std::string& key,
-                        const std::string& column_family,
+                        const std::std::string& key,
+                        const std::std::string& column_family,
                         const ColumnSlicePredicate& column_slice_predicate)
 {
   get_columns(result_columns, key, column_family, column_slice_predicate, default_read_consistency_level);
 }
 
 
-inline org::apache::cassandra::Column Cassandra::getColumn(const string& key,
-                            const string& column_family,
-                            const string& super_column_name,
-                            const string& column_name)
+inline org::apache::cassandra::Column Cassandra::getColumn(const std::string& key,
+                            const std::string& column_family,
+                            const std::string& super_column_name,
+                            const std::string& column_name)
 {
   return getColumn(key, column_family, super_column_name, column_name, org::apache::cassandra::ConsistencyLevel::QUORUM);
 }
 
 
-inline org::apache::cassandra::Column Cassandra::getColumn(const string& key,
-                            const string& column_family,
-                            const string& column_name)
+inline org::apache::cassandra::Column Cassandra::getColumn(const std::string& key,
+                            const std::string& column_family,
+                            const std::string& column_name)
 {
   return getColumn(key, column_family, "", column_name, org::apache::cassandra::ConsistencyLevel::QUORUM);
 }
 
 
-inline string Cassandra::getColumnValue(const string& key,
-                                 const string& column_family,
-                                 const string& super_column_name,
-                                 const string& column_name)
+inline std::string Cassandra::getColumnValue(const std::string& key,
+                                 const std::string& column_family,
+                                 const std::string& super_column_name,
+                                 const std::string& column_name)
 {
   return getColumn(key, column_family, super_column_name, column_name).value;
 }
 
 
-inline string Cassandra::getColumnValue(const string& key,
-                                 const string& column_family,
-                                 const string& column_name)
+inline std::string Cassandra::getColumnValue(const std::string& key,
+                                 const std::string& column_family,
+                                 const std::string& column_name)
 {
   return getColumn(key, column_family, column_name).value;
 }
 
 
-inline int64_t Cassandra::getIntegerColumnValue(const string& key,
-                                         const string& column_family,
-                                         const string& column_name)
+inline int64_t Cassandra::getIntegerColumnValue(const std::string& key,
+                                         const std::string& column_family,
+                                         const std::string& column_name)
 {
-  string ret= getColumn(key, column_family, column_name).value;
+  std::string ret= getColumn(key, column_family, column_name).value;
   return deserializeLong(ret);
 }
 
 
-inline org::apache::cassandra::SuperColumn Cassandra::getSuperColumn(const string& key,
-                                      const string& column_family,
-                                      const string& super_column_name)
+inline org::apache::cassandra::SuperColumn Cassandra::getSuperColumn(const std::string& key,
+                                      const std::string& column_family,
+                                      const std::string& super_column_name)
 {
   return getSuperColumn(key, column_family, super_column_name, org::apache::cassandra::ConsistencyLevel::QUORUM);
 }
 
 
-inline vector<org::apache::cassandra::Column> Cassandra::getColumns(
-    const string &key,
-    const string &column_family,
-    const string &super_column_name,
-    const vector<string>& column_names
+inline std::vector<org::apache::cassandra::Column> Cassandra::getColumns(
+    const std::string &key,
+    const std::string &column_family,
+    const std::string &super_column_name,
+    const std::vector<std::string>& column_names
     )
 {
   return getColumns(key, column_family, super_column_name, column_names, org::apache::cassandra::ConsistencyLevel::QUORUM);
 }
 
 
-inline vector<org::apache::cassandra::Column> Cassandra::getColumns(
-    const string &key,
-    const string &column_family,
-    const vector<string>& column_names,
+inline std::vector<org::apache::cassandra::Column> Cassandra::getColumns(
+    const std::string &key,
+    const std::string &column_family,
+    const std::vector<std::string>& column_names,
     const org::apache::cassandra::ConsistencyLevel::type level
     )
 {
@@ -1013,17 +1013,17 @@ inline vector<org::apache::cassandra::Column> Cassandra::getColumns(
 }
 
 
-inline vector<org::apache::cassandra::Column> Cassandra::getColumns(
-    const string &key,
-    const string &column_family,
-    const vector<string>& column_names
+inline std::vector<org::apache::cassandra::Column> Cassandra::getColumns(
+    const std::string &key,
+    const std::string &column_family,
+    const std::vector<std::string>& column_names
     )
 {
   return getColumns(key, column_family, "", column_names, org::apache::cassandra::ConsistencyLevel::QUORUM);
 }
 
 
-inline vector<org::apache::cassandra::Column> Cassandra::getColumns(const string &key,
+inline std::vector<org::apache::cassandra::Column> Cassandra::getColumns(const std::string &key,
                            const std::string &column_family,
                            const std::string &super_column_name,
                            const org::apache::cassandra::SliceRange &range)
@@ -1032,7 +1032,7 @@ inline vector<org::apache::cassandra::Column> Cassandra::getColumns(const string
 }
 
 
-inline vector<org::apache::cassandra::Column> Cassandra::getColumns(const string &key,
+inline std::vector<org::apache::cassandra::Column> Cassandra::getColumns(const std::string &key,
                            const std::string &column_family,
                            const org::apache::cassandra::SliceRange &range,
                            const org::apache::cassandra::ConsistencyLevel::type level)
@@ -1041,7 +1041,7 @@ inline vector<org::apache::cassandra::Column> Cassandra::getColumns(const string
 }
 
 
-inline vector<org::apache::cassandra::Column> Cassandra::getColumns(const string &key,
+inline std::vector<org::apache::cassandra::Column> Cassandra::getColumns(const std::string &key,
                            const std::string &column_family,
                            const org::apache::cassandra::SliceRange &range)
 {
@@ -1049,7 +1049,7 @@ inline vector<org::apache::cassandra::Column> Cassandra::getColumns(const string
 }
 
 
-inline int32_t Cassandra::getCount(const string& key, 
+inline int32_t Cassandra::getCount(const std::string& key, 
                             const org::apache::cassandra::ColumnParent& col_parent,
                             const org::apache::cassandra::SlicePredicate& pred)
 {
