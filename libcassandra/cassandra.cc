@@ -413,14 +413,6 @@ void Cassandra::get_columns(std::vector<Column> &result_columns,
 
 
 vector<SuperColumn> Cassandra::getSuperColumns(
-  const string& key,
-  const string &column_family,
-  const vector<string> super_column_names)
-{
-  return getSuperColumns(key, column_family, super_column_names, ConsistencyLevel::QUORUM);
-}
-
-vector<SuperColumn> Cassandra::getSuperColumns(
     const string& key,
     const string& column_family,
     const SliceRange &range,

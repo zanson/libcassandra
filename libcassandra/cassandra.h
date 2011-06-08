@@ -1054,6 +1054,14 @@ inline std::vector<org::apache::cassandra::Column> Cassandra::getColumns(const s
 }
 
 
+inline std::vector<org::apache::cassandra::SuperColumn> Cassandra::getSuperColumns(const std::string& key,
+                           const std::string &column_family,
+                           const std::vector<std::string>& super_column_names)
+{
+  return getSuperColumns(key, column_family, super_column_names, org::apache::cassandra::ConsistencyLevel::QUORUM);
+}
+
+
 inline int32_t Cassandra::getCount(const std::string& key, 
                             const org::apache::cassandra::ColumnParent& col_parent,
                             const org::apache::cassandra::SlicePredicate& pred)
