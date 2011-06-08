@@ -16,7 +16,7 @@ AM_INIT_AUTOMAKE
 AC_PROG_CXX
 AC_PROG_LIBTOOL
 
-PANDORA_CANONICAL_TARGET(less-warnings, warnings-always-on, require-cxx, skip-visibility)
+PANDORA_CANONICAL_TARGET(less-warnings, require-cxx, skip-visibility)
 
 #shared library versioning
 CASSANDRA_LIBRARY_VERSION=2:0:0
