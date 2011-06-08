@@ -543,6 +543,11 @@ public:
                    const ColumnSlicePredicate & column_slice_predicate,
                    const org::apache::cassandra::ConsistencyLevel::type consistency_level);
 
+  void get_columns(std::vector<org::apache::cassandra::Column>& result_columns,
+                   const std::string& key,
+                   const std::string& column_family,
+                   const ColumnSlicePredicate& column_slice_predicate);
+
   /**
    * Retrieve multiple columns by range
    *
@@ -592,11 +597,11 @@ public:
    */
   std::vector<org::apache::cassandra::SuperColumn> getSuperColumns(const std::string &key,
                                                                    const std::string &column_family,
-                                                                   const std::vector<std::string> super_column_names,
+                                                                   const std::vector<std::string>& super_column_names,
                                                                    const org::apache::cassandra::ConsistencyLevel::type level);
   std::vector<org::apache::cassandra::SuperColumn> getSuperColumns(const std::string &key,
                                                                    const std::string &column_family,
-                                                                   const std::vector<std::string> super_column_names);
+                                                                   const std::vector<std::string>& super_column_names);
   /**
    * Retrieve multiple super columns by range
    *
