@@ -47,31 +47,31 @@ class ColumnSlicePredicate : public org::apache::cassandra::SlicePredicate
  */
 {
 public:
-	static const int32_t default_count = 100;
-	inline ColumnSlicePredicate(const std::string & start, const std::string & finish, int32_t count = default_count, bool reversed = false)
-	{
-		slice_range.start = start;
-		slice_range.finish = finish;
-		slice_range.count = count;
-		slice_range.reversed = reversed;
-		__isset.slice_range= true;
-	};
-	
-	inline ColumnSlicePredicate(const std::string & start, const std::string & finish, bool reversed) 
-	{
-		slice_range.start = start;
-		slice_range.finish = finish;
-		slice_range.count = default_count;
-		slice_range.reversed = reversed;
-		__isset.slice_range= true;
-	};
-	inline ColumnSlicePredicate(const std::vector<std::string>  & n_column_names) 
-	{
-		column_names = n_column_names;
-		__isset.column_names= true;
-	}
-	// inline void foo() const {};
-	friend std::ostream& operator<< (std::ostream& o, const ColumnSlicePredicate & col_slice_predicate);
+  static const int32_t default_count = 100;
+  inline ColumnSlicePredicate(const std::string & start, const std::string & finish, int32_t count = default_count, bool reversed = false)
+  {
+    slice_range.start = start;
+    slice_range.finish = finish;
+    slice_range.count = count;
+    slice_range.reversed = reversed;
+    __isset.slice_range= true;
+  };
+  
+  inline ColumnSlicePredicate(const std::string & start, const std::string & finish, bool reversed) 
+  {
+    slice_range.start = start;
+    slice_range.finish = finish;
+    slice_range.count = default_count;
+    slice_range.reversed = reversed;
+    __isset.slice_range= true;
+  };
+  inline ColumnSlicePredicate(const std::vector<std::string>  & n_column_names) 
+  {
+    column_names = n_column_names;
+    __isset.column_names= true;
+  }
+  // inline void foo() const {};
+  friend std::ostream& operator<< (std::ostream& o, const ColumnSlicePredicate & col_slice_predicate);
 };
 
 std::ostream& operator<< (std::ostream& os, const ColumnSlicePredicate & col_slice_predicate);
@@ -251,7 +251,7 @@ public:
    * @param[in] ttl time to live
    */
   void insertColumn(const int64_t timestamp,
-		    const std::string& key,
+                    const std::string& key,
                     const std::string& column_family,
                     const std::string& super_column_name,
                     const std::string& column_name,
@@ -270,7 +270,7 @@ public:
    * @param[in] value the column value
    */
   void insertColumn(const int64_t timestamp,
-		    const std::string& key,
+                    const std::string& key,
                     const std::string& column_family,
                     const std::string& super_column_name,
                     const std::string& column_name,
@@ -289,7 +289,7 @@ public:
    * @param[in] value the column value
    */
   void insertColumn(const int64_t timestamp,
-		    const std::string& key,
+                    const std::string& key,
                     const std::string& column_family,
                     const std::string& super_column_name,
                     const std::string& column_name,
@@ -307,7 +307,7 @@ public:
    * @param[in] value the column value
    */
   void insertColumn(const int64_t timestamp,
-		    const std::string& key,
+                    const std::string& key,
                     const std::string& column_family,
                     const std::string& column_name,
                     const std::string& value,
@@ -323,7 +323,7 @@ public:
    * @param[in] value the column value
    */
   void insertColumn(const int64_t timestamp,
-		    const std::string& key,
+                    const std::string& key,
                     const std::string& column_family,
                     const std::string& column_name,
                     const int64_t value,
@@ -526,16 +526,17 @@ public:
    * @param[in] consistency_level Consistency level (optional)
    */
   void get_columns(std::vector<org::apache::cassandra::Column> & result_columns,
-		  const std::string & key,
-		  const std::string & column_family,
-		  const ColumnSlicePredicate & column_slice_predicate,
-		  org::apache::cassandra::ConsistencyLevel::type consistency_level);
+                   const std::string & key,
+                   const std::string & column_family,
+                   const ColumnSlicePredicate & column_slice_predicate,
+                   org::apache::cassandra::ConsistencyLevel::type consistency_level);
   
   void inline get_columns(std::vector<org::apache::cassandra::Column> & result_columns,
-			  const std::string & key,
-			  const std::string & column_family,
-			  const ColumnSlicePredicate & column_slice_predicate) {
-	get_columns(result_columns, key, column_family, column_slice_predicate, default_read_consistency_level);
+                          const std::string & key,
+                          const std::string & column_family,
+                          const ColumnSlicePredicate & column_slice_predicate)
+  {
+    get_columns(result_columns, key, column_family, column_slice_predicate, default_read_consistency_level);
   }
 
   /**
