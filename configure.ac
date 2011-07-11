@@ -11,12 +11,12 @@ AC_INIT([libcassandra],[0.1],[http://github.com/posulliv/libcassandra])
 AC_CONFIG_MACRO_DIR([m4])
 AC_CONFIG_SRCDIR([libcassandra/cassandra.cc])
 AC_CONFIG_AUX_DIR(config)
+
+PANDORA_CANONICAL_TARGET(less-warnings, require-cxx, skip-visibility)
 AM_INIT_AUTOMAKE
 
 AC_PROG_CXX
 AC_PROG_LIBTOOL
-
-PANDORA_CANONICAL_TARGET(less-warnings, require-cxx, skip-visibility)
 
 #shared library versioning
 CASSANDRA_LIBRARY_VERSION=2:0:0
