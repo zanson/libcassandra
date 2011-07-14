@@ -115,7 +115,7 @@ public:
             const std::string &in_host,
             int in_port,
             const std::string& keyspace);
-  ~Cassandra();
+  virtual ~Cassandra();
 
   enum FailoverPolicy
   {
@@ -124,9 +124,9 @@ public:
     ON_FAIL_TRY_ALL_AVAILABLE /* try all available servers in cluster before return to user */
   };
 
-  void setRecvTimeout(int recv_timeout);
+  virtual void setRecvTimeout(int recv_timeout);
 
-  void setSendTimeout(int send_timeout);
+  virtual void setSendTimeout(int send_timeout);
 
   /**
    * @return the underlying cassandra thrift client.
@@ -138,23 +138,23 @@ public:
    * @param[in] user to use for authentication
    * @param[in] password to use for authentication
    */
-  void login(const std::string& user, const std::string& password);
+  virtual void login(const std::string& user, const std::string& password);
 
   /**
    * @return the keyspace associated with this session
    */
-  std::string getCurrentKeyspace() const;
+  virtual std::string getCurrentKeyspace() const;
 
   /**
    * set the keyspace for the current connection
    * @param[in] ks_name name of the keyspace to specify for current session
    */
-  void setKeyspace(const std::string& ks_name);
+  virtual void setKeyspace(const std::string& ks_name);
 
   /**
    * @return all the keyspace definitions.
    */
-  std::vector<KeyspaceDefinition> getKeyspaces();
+  virtual std::vector<KeyspaceDefinition> getKeyspaces();
 
 
   /**
@@ -169,7 +169,7 @@ public:
    * @param[in] level consistency level
    * @param[in] ttl time to live
    */
-  void insertColumn(const int64_t timestamp,
+  virtual void insertColumn(const int64_t timestamp,
                     const std::string& key,
                     const std::string& column_family,
                     const std::string& super_column_name,
@@ -336,7 +336,7 @@ public:
    * @param[in] col_path the path to the column or super column
    * @param[in] level consistency level
    */
-  void remove(const int64_t timestamp,
+  virtual void remove(const int64_t timestamp,
               const std::string& key,
               const org::apache::cassandra::ColumnPath& col_path,
               const org::apache::cassandra::ConsistencyLevel::type level);
@@ -370,7 +370,7 @@ public:
    * @param[in] super_column_name the super column name (optional)
    * @param[in] column_name the column name (optional)
    */
-  void remove(const std::string& key,
+  virtual void remove(const std::string& key,
               const std::string& column_family,
               const std::string& super_column_name,
               const std::string& column_name);
@@ -410,7 +410,7 @@ public:
    * @param[in] level consistency level
    * @return a column
    */
-  org::apache::cassandra::Column getColumn(const std::string& key,
+  virtual org::apache::cassandra::Column getColumn(const std::string& key,
                                            const std::string& column_family,
                                            const std::string& super_column_name,
                                            const std::string& column_name,
@@ -481,7 +481,7 @@ public:
                                 const std::string& column_family,
                                 const std::string& column_name);
 
-  org::apache::cassandra::SuperColumn getSuperColumn(const std::string& key,
+  virtual org::apache::cassandra::SuperColumn getSuperColumn(const std::string& key,
                                                      const std::string& column_family,
                                                      const std::string& super_column_name,
                                                      const org::apache::cassandra::ConsistencyLevel::type level);
@@ -500,7 +500,7 @@ public:
    * @param[in] level Consistency level (optional)
    * @return A list of found columns
    */
-  std::vector<org::apache::cassandra::Column> getColumns(const std::string &key,
+  virtual std::vector<org::apache::cassandra::Column> getColumns(const std::string &key,
                                                          const std::string &column_family,
                                                          const std::string &super_column_name,
                                                          const std::vector<std::string>& column_names,
@@ -519,7 +519,7 @@ public:
    * @param[in] level Consistency level (optional)
    * @return A list of found columns
    */
-  std::vector<org::apache::cassandra::Column> getColumns(const std::string &key,
+  virtual std::vector<org::apache::cassandra::Column> getColumns(const std::string &key,
                                                          const std::string &column_family,
                                                          const std::vector<std::string>& column_names,
                                                          const org::apache::cassandra::ConsistencyLevel::type level);
@@ -537,7 +537,7 @@ public:
    * @param[in] column_slice_predicate the list of column slice predicate
    * @param[in] consistency_level Consistency level (optional)
    */
-  void get_columns(std::vector<org::apache::cassandra::Column>& result_columns,
+  virtual void get_columns(std::vector<org::apache::cassandra::Column>& result_columns,
                    const std::string & key,
                    const std::string & column_family,
                    const ColumnSlicePredicate & column_slice_predicate,
@@ -558,7 +558,7 @@ public:
    * @param[in] level Consistency level (optional)
    * @return A list of found columns
    */
-  std::vector<org::apache::cassandra::Column> getColumns(const std::string &key,
+  virtual std::vector<org::apache::cassandra::Column> getColumns(const std::string &key,
                                                          const std::string &column_family,
                                                          const std::string &super_column_name,
                                                          const org::apache::cassandra::SliceRange &range,
@@ -577,7 +577,7 @@ public:
    * @param[in] level Consistency level (optional)
    * @return A list of found columns
    */
-  std::vector<org::apache::cassandra::Column> getColumns(const std::string &key,
+  virtual std::vector<org::apache::cassandra::Column> getColumns(const std::string &key,
                                                          const std::string &column_family,
                                                          const org::apache::cassandra::SliceRange &range,
                                                          const org::apache::cassandra::ConsistencyLevel::type level);
@@ -595,7 +595,7 @@ public:
    * @param[in] level Consistency level (optional)
    * @return A list of found super columns
    */
-  std::vector<org::apache::cassandra::SuperColumn> getSuperColumns(const std::string &key,
+  virtual std::vector<org::apache::cassandra::SuperColumn> getSuperColumns(const std::string &key,
                                                                    const std::string &column_family,
                                                                    const std::vector<std::string>& super_column_names,
                                                                    const org::apache::cassandra::ConsistencyLevel::type level);
@@ -611,7 +611,7 @@ public:
    * @param[in] level Consistency level (optional)
    * @return A list of found super columns
    */
-  std::vector<org::apache::cassandra::SuperColumn> getSuperColumns(const std::string &key,
+  virtual std::vector<org::apache::cassandra::SuperColumn> getSuperColumns(const std::string &key,
                                                                    const std::string &column_family,
                                                                    const org::apache::cassandra::SliceRange &range,
                                                                    const org::apache::cassandra::ConsistencyLevel::type level);
@@ -620,7 +620,7 @@ public:
                                                                    const org::apache::cassandra::SliceRange &range);
 
 
-  std::map<std::string, std::vector<org::apache::cassandra::Column> >
+  virtual std::map<std::string, std::vector<org::apache::cassandra::Column> >
   getRangeSlice(const org::apache::cassandra::ColumnParent& col_parent,
                 const org::apache::cassandra::SlicePredicate& pred,
                 const std::string& start,
@@ -635,7 +635,7 @@ public:
                 const std::string& finish,
                 const int32_t row_count);
 
-  std::map<std::string, std::vector<org::apache::cassandra::SuperColumn> >
+  virtual std::map<std::string, std::vector<org::apache::cassandra::SuperColumn> >
   getSuperRangeSlice(const org::apache::cassandra::ColumnParent& col_parent,
                      const org::apache::cassandra::SlicePredicate& pred,
                      const std::string& start,
@@ -656,13 +656,13 @@ public:
    *                  for a query using secondary indexes
    * @return a map of row keys to column names and values
    */
-  std::map<std::string, std::map<std::string, std::string> >
+  virtual std::map<std::string, std::map<std::string, std::string> >
   getIndexedSlices(const IndexedSlicesQuery& query);
 
   /**
    * @return number of columns in a row or super column
    */
-  int32_t getCount(const std::string& key,
+  virtual int32_t getCount(const std::string& key,
                    const org::apache::cassandra::ColumnParent& col_parent,
                    const org::apache::cassandra::SlicePredicate& pred,
                    const org::apache::cassandra::ConsistencyLevel::type level);
@@ -679,86 +679,86 @@ public:
    * @param[in] ks_def object representing defintion for keyspace to create
    * @return the schema ID for the keyspace created
    */
-  std::string createKeyspace(const KeyspaceDefinition& ks_def);
+  virtual std::string createKeyspace(const KeyspaceDefinition& ks_def);
 
   /**
    * Update a keyspace
    * @param[in] ks_def object representing defintion for keyspace to update
    * @return the schema ID for the keyspace created
    */
-  std::string updateKeyspace(const KeyspaceDefinition& ks_def);
+  virtual std::string updateKeyspace(const KeyspaceDefinition& ks_def);
 
   /**
    * drop a keyspace
    * @param[in] ks_name the name of the keyspace to drop
    * @return the schema ID for the keyspace dropped
    */
-  std::string dropKeyspace(const std::string& ks_name);
+  virtual std::string dropKeyspace(const std::string& ks_name);
 
   /**
    * Create a column family
    * @param[in] cf_def object representing defintion for column family to create
    * @return the schema ID for the column family created
    */
-  std::string createColumnFamily(const ColumnFamilyDefinition& cf_def);
+  virtual std::string createColumnFamily(const ColumnFamilyDefinition& cf_def);
 
   /**
    * Update a column family
    * @param[in] cf_def object representing defintion for column family to update
    * @return the schema ID for the column family created
    */
-  std::string updateColumnFamily(const ColumnFamilyDefinition& cf_def);
+  virtual std::string updateColumnFamily(const ColumnFamilyDefinition& cf_def);
 
   /**
    * drop a column family
    * @param[in] cf_name the name of the column family to drop
    * @return the schema ID for the column family dropped
    */
-  std::string dropColumnFamily(const std::string& cf_name);
+  virtual std::string dropColumnFamily(const std::string& cf_name);
 
   /**
    * @return the target server cluster name.
    */
-  std::string getClusterName();
+  virtual std::string getClusterName();
 
   /**
    * @return the server version.
    */
-  std::string getServerVersion();
+  virtual std::string getServerVersion();
 
   /**
    * @return a string property from the server
    */
-  void getStringProperty(std::string &return_val, const std::string &property);
+  virtual void getStringProperty(std::string &return_val, const std::string &property);
 
   /**
    * @return hostname
    */
-  std::string getHost();
+  virtual std::string getHost();
 
   /**
    * @return port number
    */
-  int getPort() const;
+  virtual int getPort() const;
 
   /**
    * Gets the token ring; a map of ranges to host addresses. Represented as a set of TokenRange
    * @param[in] keyspace the name of the keyspace
    * @return token ring map
    */
-  std::vector<org::apache::cassandra::TokenRange> describeRing(const std::string &keyspace);
+  virtual std::vector<org::apache::cassandra::TokenRange> describeRing(const std::string &keyspace);
 
   /**
    * Inserts in the same call to cassandra a set of columns and supercolumns
    * @param[in] columns to insert
    * @param[in] super columns to insert
    */
-  void batchInsert(const std::vector<ColumnInsertTuple> &columns,
+  virtual void batchInsert(const std::vector<ColumnInsertTuple> &columns,
                    const std::vector<SuperColumnInsertTuple> &super_columns,
                    const org::apache::cassandra::ConsistencyLevel::type level);
 
 
-  void batchInsert(const std::vector<TimestampedColumnInsertTuple> &columns,
+  virtual void batchInsert(const std::vector<TimestampedColumnInsertTuple> &columns,
                    const org::apache::cassandra::ConsistencyLevel::type level);
 
 
