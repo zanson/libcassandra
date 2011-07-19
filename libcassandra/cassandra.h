@@ -726,10 +726,6 @@ public:
    */
   virtual std::string getServerVersion();
 
-  /**
-   * @return a string property from the server
-   */
-  virtual void getStringProperty(std::string &return_val, const std::string &property);
 
   /**
    * @return hostname
